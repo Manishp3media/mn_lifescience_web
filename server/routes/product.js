@@ -1,12 +1,13 @@
 import express from "express";
 import { createProduct, getAllProducts, getProductsByCategory, getProductById } from "../controllers/product.js";
 import authMiddleware from "../middleware/auth.js";
-import { get } from "mongoose";
+import { uploadProductImage } from "../middleware/uploadDocuments.js";
+import { deleteProduct } from "../utils/cloudinary.js";
 
 const router = express.Router();
 
 // Create Product
-router.post("/admin/create/product",authMiddleware('admin'), createProduct);
+router.post("/admin/create/product",authMiddleware('admin'),  uploadProductImage, createProduct);
 
 // Get All Products in Admin
 router.get("/admin/get/products",authMiddleware('admin'), getAllProducts);
@@ -19,5 +20,8 @@ router.get("/user/get/category/products/:category",authMiddleware('user'), getPr
 
 // Get Product By ID
 router.get("/user/get/product/:id",authMiddleware('user'), getProductById);
+
+// Delete Product
+router.delete("/admin/delete/product",authMiddleware('admin'), deleteProduct);
 
 export default router;

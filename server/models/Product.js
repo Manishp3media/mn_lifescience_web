@@ -23,6 +23,9 @@ const productSchema = new mongoose.Schema({
         type: String,
         unique: true,
     },
+    productImage: {
+        type: String,
+    },
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category', // Reference to the Category model

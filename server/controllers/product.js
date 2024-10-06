@@ -11,11 +11,8 @@ export const createProduct = async (req, res) => {
         createProductSchema.parse(req.body);
         const { name, description, category: categoryName, composition, use, sku  } = req.body;
 
-           // Convert SKU to lowercase for case-insensitive uniqueness (optional)
-           const lowerCaseSKU = sku.toLowerCase();
-
             // Check if SKU already exists
-        const existingProduct = await Product.findOne({ sku: lowerCaseSKU });
+        const existingProduct = await Product.findOne({ sku });
         if (existingProduct) {
             return res.status(400).json({ message: "SKU already exists" });
         }
@@ -26,6 +23,11 @@ export const createProduct = async (req, res) => {
                return res.status(404).json({ message: "Category not found" });
            }   
 
+        // Check if image is provided
+        let productImage;
+        if (req.files && req.files["productImage"]) {
+            productImage = req.files["productImage"][0].path;
+        }
            
         // Create new product
         const product = new Product({
@@ -34,7 +36,8 @@ export const createProduct = async (req, res) => {
             category: category._id,
             composition,
             use,
-            sku: lowerCaseSKU
+            sku,
+            productImage
         });
 
         // Save product to database
@@ -42,6 +45,7 @@ export const createProduct = async (req, res) => {
 
         res.status(201).json({ message: "Product created successfully" });
     } catch (err) { 
+        console.error(err); //
         if (err instanceof z.ZodError) {
             return res.status(422).json({ errors: err.errors });    
         }
@@ -75,6 +79,7 @@ export const getAllProducts = async (req, res) => {
                     use: 1,
                     sku: 1,
                     status: 1,
+                    productImage: 1,
                     "category": "$categoryDetails.name" // Include only the name of the category
                 }
             }
@@ -116,3 +121,4 @@ export const getProductById = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+

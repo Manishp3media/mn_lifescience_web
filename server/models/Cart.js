@@ -6,10 +6,6 @@ const cartItemSchema = new mongoose.Schema({
         ref: 'Product', // Reference to the Product model
         required: true,
     },
-    quantity: {
-        type: Number,
-        default: 1,
-    },
 }, {
     timestamps: true, // Adds createdAt and updatedAt timestamps
 });
