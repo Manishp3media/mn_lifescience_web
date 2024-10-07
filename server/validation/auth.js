@@ -3,6 +3,7 @@ import { z } from "zod";
 export const userSignupSchema = z.object({
     name: z.string().min(1, "Name is required"),
     mobileNumber: z.string().min(10, "Mobile number must be at least 10 digits").max(10, "Mobile number must be at most 10 digits"),
+    city: z.string().min(1, "City is required").optional(),
 });
 
 export const userLoginSchema = z.object({

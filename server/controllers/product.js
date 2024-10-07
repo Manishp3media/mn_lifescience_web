@@ -122,3 +122,42 @@ export const getProductById = async (req, res) => {
     }
 }
 
+
+// Edit Product
+export const editProduct = async (req, res) => {
+    try {;
+        const { id, name, description, category: CategoryName, composition, use, sku } = req.body;
+        
+
+        // Check if product exists
+        const product = await Product.findById(id);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        // Check if the category exists
+        const category = await Category.findOne({ name: CategoryName.toLowerCase() });
+        if (!category) {
+            return res.status(410).json({ message: "Category not found" });
+        }
+
+        // Check Sku already exists otherthan the current product
+        const existingProduct = await Product.findOne({ sku, _id: { $ne: id } });
+        if (existingProduct) {
+            return res.status(400).json({ message: "SKU already exists" });
+        }
+
+        // Update product
+        product.name = name;
+        product.description = description;
+        product.category = category._id;
+        product.composition = composition;
+        product.use = use;
+        product.sku = sku;
+        await product.save();
+
+        res.status(200).json({ message: "Product updated successfully" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}

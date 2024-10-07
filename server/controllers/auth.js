@@ -115,6 +115,17 @@ export const createAdmin = async (req, res) => {
     }
 };
 
+// Get Users
+export const getUsers = async (req, res) => {
+    try {
+        const users = await User.find({ role: 'user' })
+        .sort({ createdAt: -1 });
+        res.status(200).json(users);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
 export const editAdmin = async (req, res) => {
     try {
         // Validate input

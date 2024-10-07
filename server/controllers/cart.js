@@ -57,6 +57,9 @@ export const getCart = async (req, res) => {
                     as: 'items.product'
                 }
             },
+            {
+                $sort: { createdAt: -1 } 
+            },
         ]);
 
         if (!cart.length) {
@@ -68,8 +71,6 @@ export const getCart = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-
-
 
 // Remove Product from Cart
 export const removeFromCart = async (req, res) => {
