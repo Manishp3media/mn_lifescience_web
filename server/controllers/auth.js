@@ -38,7 +38,7 @@ export const userLogin = async (req, res) => {
     try {
         // Validate input
         userLoginSchema.parse(req.body);
-        const { mobileNumber, otp } = req.body;
+        const { mobileNumber } = req.body;
 
         // Check if user exists
         const user = await User.findOne({ mobileNumber });

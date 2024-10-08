@@ -7,8 +7,7 @@ export const userSignupSchema = z.object({
 });
 
 export const userLoginSchema = z.object({
-    mobileNumber: z.string().min(10, "Mobile number must be at least 10 digits").max(15, "Mobile number must be at most 15 digits"),
-    otp: z.string().length(6, "OTP must be 6 digits").optional(),
+    mobileNumber: z.string().min(10, "Mobile number must be at least 10 digits").max(15, "Mobile number must be at most 15 digits")
 });
 
 export const adminLoginSchema = z.object({
