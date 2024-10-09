@@ -1,70 +1,146 @@
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
-import { Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Search, X } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import CreateProduct from "./CreateProduct";
+import { fetchProducts, setSelectedCategory, setSelectedStatus } from '@/redux/productSlice';
 
-const AdminNavbar = ({ title }) => {
+const AdminNavbar = ({ title, onSearch }) => {
+    const dispatch = useDispatch();
     const [isModalOpen, setModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const { products, selectedCategory, selectedStatus } = useSelector(state => state.productList || {});
 
-      // Function to toggle modal
-      const handleOpenModal = () => {
-        setModalOpen(true);
+    useEffect(() => {
+        dispatch(fetchProducts());
+    }, [dispatch]);
+
+    const handleOpenModal = () => setModalOpen(true);
+    const handleCloseModal = () => setModalOpen(false);
+
+    const handleSearch = (event) => {
+        setSearchTerm(event.target.value);
+        onSearch(event.target.value);
     };
 
-    const handleCloseModal = () => {
-        setModalOpen(false);
+    const handleCategoryFilter = (category) => {
+        dispatch(setSelectedCategory(category));
     };
+
+    const handleStatusFilter = (status) => {
+        dispatch(setSelectedStatus(status));
+    };
+
+    const clearFilter = (filterType) => {
+        if (filterType === 'category') {
+            dispatch(setSelectedCategory(null));
+        } else if (filterType === 'status') {
+            dispatch(setSelectedStatus(null));
+        }
+    };
+
+    const uniqueCategories = Array.isArray(products)
+        ? [...new Set(products.map(product => product.category))]
+        : [];
+    const uniqueStatuses = Array.isArray(products)
+        ? [...new Set(products.map(product => product.status))]
+        : [];
 
     return (
-        <div>
-            <nav className="bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-700">
-                <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto py-4">
-                    {/* Dynamic Title */}
-                    <a href="#" className="flex flex-col items-start">
-                        <span className="self-start text-3xl font-semibold whitespace-nowrap dark:text-white">{title}</span>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">{`${title} . Dashboard . List`}</span>
-                    </a>
-
-                    {/* Mobile Menu Button */}
-                    <button
-                        data-collapse-toggle="navbar-dropdown"
-                        type="button"
-                        className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-                        aria-controls="navbar-dropdown"
-                        aria-expanded="false"
-                    >
-                        <span className="sr-only">Open main menu</span>
-                        <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-                            <path
-                                stroke="currentColor"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M1 1h15M1 7h15M1 13h15"
-                            />
-                        </svg>
-                    </button>
-
-                    {/* Menu Items */}
-                    <div className="hidden w-full md:block md:w-auto" id="navbar-dropdown">
-                        <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-                            {/* Add Button */}
-                            <Button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 h-[40px] mr-[200px]"
+        <nav className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-16">
+                    <div className="flex items-center">
+                        <span className="text-2xl font-bold">{title}</span>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center px-2 lg:ml-6 lg:justify-end">
+                        <div className="max-w-lg w-full lg:max-w-xs">
+                            <label htmlFor="search" className="sr-only">Search</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Search className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <Input
+                                    id="search"
+                                    name="search"
+                                    className="block w-full pl-10 pr-3 py-2 border border-transparent rounded-md leading-5 bg-white bg-opacity-25 text-white placeholder-white focus:outline-none focus:bg-white focus:text-gray-900 focus:placeholder-gray-400 focus:ring-0 sm:text-sm"
+                                    placeholder="Search products"
+                                    type="search"
+                                    value={searchTerm}
+                                    onChange={handleSearch}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="bg-white text-blue-600 hover:bg-blue-100">Category</Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuLabel>Select Category</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                {uniqueCategories.map(category => (
+                                    <DropdownMenuItem key={category} onSelect={() => handleCategoryFilter(category)}>
+                                        {category}
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="bg-white text-purple-600 hover:bg-purple-100">Status</Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuLabel>Select Status</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                {uniqueStatuses.map(status => (
+                                    <DropdownMenuItem key={status} onSelect={() => handleStatusFilter(status)}>
+                                        {status}
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <Button
+                            className="bg-green-500 hover:bg-green-600 text-white"
                             onClick={handleOpenModal}
-                            >
-                                <Plus className="mr-2 h-5" />
-                                <span>Add</span>
-                            </Button>
-                        </ul>
+                        >
+                            <Plus className="mr-2 h-5 w-5" />
+                            Add Product
+                        </Button>
                     </div>
                 </div>
-            </nav>
-
-            {/* Create Product Modal */}
-            {isModalOpen && (
-                <CreateProduct isOpen={isModalOpen} onClose={handleCloseModal} />
-            )}
-        </div>
+                <div className="flex items-center space-x-2 py-2">
+                    {selectedCategory && (
+                        <Badge variant="secondary" className="bg-blue-200 text-blue-800 flex items-center">
+                            Category: {selectedCategory}
+                            <Button variant="ghost" size="sm" onClick={() => clearFilter('category')} className="ml-1 p-0">
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </Badge>
+                    )}
+                    {selectedStatus && (
+                        <Badge variant="secondary" className="bg-purple-200 text-purple-800 flex items-center">
+                            Status: {selectedStatus}
+                            <Button variant="ghost" size="sm" onClick={() => clearFilter('status')} className="ml-1 p-0">
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </Badge>
+                    )}
+                </div>
+            </div>
+            {isModalOpen && <CreateProduct isOpen={isModalOpen} onClose={handleCloseModal} />}
+        </nav>
     );
 };
 

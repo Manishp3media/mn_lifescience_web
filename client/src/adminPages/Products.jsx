@@ -72,79 +72,18 @@ const Products = () => {
         ? [...new Set(products.map(product => product.status))]
         : [];
 
-    if (status === 'loading') {
-        return <div>Loading...</div>;
-    }
+    // if (status === 'loading') {
+    //     return <div>Loading...</div>;
+    // }
 
-    if (status === 'failed') {
-        return <div>Error: {error}</div>;
-    }
+    // if (status === 'failed') {
+    //     return <div>Error: {error}</div>;
+    // }
 
     return (
-        <div className="p-4">
+        <div >
             <AdminNavbar title="Products" />
-            <div className="relative mt-4">
-                <Input
-                    placeholder="Search By Product Name"
-                    className="pl-10 border-black"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                />
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                    <Search className="text-gray-500" />
-                </span>
-            </div>
-            <div className="flex items-center mt-4 space-x-2">
-                {!selectedCategory && !selectedStatus && (
-                    <h6>No filters applied</h6>
-                )}
-                {selectedCategory && (
-                    <Badge variant="secondary" className="flex items-center">
-                        Category: {selectedCategory}
-                        <Button variant="ghost" size="sm" onClick={() => clearFilter('category')}>
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </Badge>
-                )}
-                {selectedStatus && (
-                    <Badge variant="secondary" className="flex items-center">
-                        Status: {selectedStatus}
-                        <Button variant="ghost" size="sm" onClick={() => clearFilter('status')}>
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </Badge>
-                )}
-            </div>
-            <div className="flex space-x-2 mt-4">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline">Category</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuLabel>Select Category</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {uniqueCategories.map(category => (
-                            <DropdownMenuItem key={category} onSelect={() => handleCategoryFilter(category)}>
-                                {category}
-                            </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline">Status</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuLabel>Select Status</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {uniqueStatuses.map(status => (
-                            <DropdownMenuItem key={status} onSelect={() => handleStatusFilter(status)}>
-                                {status}
-                            </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
+           
             <Table className="mt-4">
                 <TableHeader>
                     <TableRow>
@@ -168,7 +107,7 @@ const Products = () => {
                                         />
                                     ) : (
                                         <div className="w-[80px] h-[80px] flex items-center justify-center mr-2">
-                                            <img src="/image.png" />
+                                            <img src="/upload.jpg" />
                                       </div>
                                         
                                     )}

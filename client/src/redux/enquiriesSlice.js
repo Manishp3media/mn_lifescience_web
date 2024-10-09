@@ -45,15 +45,15 @@ const enquiryListSlice = createSlice({
       state.dateRange = action.payload;
       state.filteredEnquiries = filteredEnquiries(state);
     },
-    clearDateRange: (state) => {
+    setClearRange: (state) => {
       state.dateRange = initialDateRange;
       state.filteredEnquiries = filteredEnquiries(state);
     },
-    selectedUser: (state, action) => {
+    setSelectedUser: (state, action) => {
       state.selectedUser = action.payload;
       state.filteredEnquiries = filteredEnquiries(state);
     },
-    selectedCity: (state, action) => {
+    setSelectedCity: (state, action) => {
       state.selectedCity = action.payload;
       state.filteredEnquiries = filteredEnquiries(state);
     },
@@ -80,8 +80,8 @@ const enquiryListSlice = createSlice({
 
 // Helper function to filter enquiries by date range, category, and status
 const filteredEnquiries = (state) => {
-  return state.enquiries.filter((product) => {
-    const enquiryDate = moment(product.createdAt);
+  return state.enquiries.filter((enquiry) => {
+    const enquiryDate = moment(enquiry.createdAt);
     const startDate = state.dateRange.startDate
       ? moment(state.dateRange.startDate)
       : null;
@@ -94,10 +94,10 @@ const filteredEnquiries = (state) => {
       : true;
 
     const matchesCity = state.selectedCity
-      ? enquiries.city === state.selectedCity
+      ? enquiry.city === state.selectedCity
       : true;
     const matchesUser = state.selectedUser
-      ? enquiries.user === state.selectedUser
+      ? enquiry.user === state.selectedUser
       : true;
 
     return isInDateRange && matchesCity && matchesUser;
@@ -107,9 +107,9 @@ const filteredEnquiries = (state) => {
 // Export actions
 export const {
   setDateRange,
-  selectedUser,
-  selectedCity,
-  clearDateRange,
+  setSelectedUser,
+  setSelectedCity,
+  setClearRange,
   setfilteredEnquiries,
 } = enquiryListSlice.actions;
 
