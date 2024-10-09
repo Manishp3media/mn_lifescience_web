@@ -50,8 +50,12 @@ const CreateProduct = ({ isOpen, onClose }) => {
               toast.success("Product created successfully");
               formik.resetForm();
             } catch (error) {
-              toast.error("Failed to create product");
-              console.error("Error creating product:", error);
+                if (error.response && error.response.status === 400 && error.response.data.message.includes("SKU already exists")) {
+                    formik.setFieldError("sku", "SKU already exists. Please use a different one.");
+                } else {
+                    toast.error("Failed to create product");
+                }
+                console.error("Error creating product:", error);
             } finally {
               setIsCreating(false);
               onClose();
@@ -87,6 +91,27 @@ const CreateProduct = ({ isOpen, onClose }) => {
                         />
                         {formik.touched.name && formik.errors.name && (
                             <div className="text-red-500">{formik.errors.name}</div>
+                        )}
+                    </div>
+
+                    <div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline">{formik.values.category || "Select Category"}</Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                {categories?.map((category) => (
+                                    <DropdownMenuItem
+                                        key={category._id}
+                                        onClick={() => handleCategorySelect(category?.name)}
+                                    >
+                                        {category?.name}
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        {formik.touched.category && formik.errors.category && (
+                            <div className="text-red-500">{formik.errors.category}</div>
                         )}
                     </div>
 
@@ -132,27 +157,6 @@ const CreateProduct = ({ isOpen, onClose }) => {
                         />
                         {formik.touched.sku && formik.errors.sku && (
                             <div className="text-red-500">{formik.errors.sku}</div>
-                        )}
-                    </div>
-
-                    <div>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline">{formik.values.category || "Select Category"}</Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                {categories.map((category) => (
-                                    <DropdownMenuItem
-                                        key={category._id}
-                                        onClick={() => handleCategorySelect(category?.name)}
-                                    >
-                                        {category?.name}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        {formik.touched.category && formik.errors.category && (
-                            <div className="text-red-500">{formik.errors.category}</div>
                         )}
                     </div>
 

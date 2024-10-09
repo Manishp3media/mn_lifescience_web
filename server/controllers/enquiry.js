@@ -30,20 +30,6 @@ export const createEnquiry = async (req, res) => {
     }
 }; 
 
-// Fetch and display all enquiries with user details
-// export const getEnquiries = async (req, res) => {
-//     try {
-//         const enquiries = await Enquiry.find()
-//             .populate('user', 'name mobileNumber city') // Populate user details (name, mobile number, and city)
-//             .populate('products', 'name')
-//             .sort({ createdAt: -1 });
-//         res.status(200).json(enquiries);
-//     } catch (err) {
-//         res.status(500).json({ error: err.message });
-//     }
-// };
-
-
 // Get All Enquiries
 export const getEnquiries = async (req, res) => {
     try {
@@ -81,6 +67,8 @@ export const getEnquiries = async (req, res) => {
                     'user.name': 1,
                     'user.mobileNumber': 1,
                     'user.city': 1,
+                    price: 1,
+                    status: 1,
                     productDetails: {
                         $map: {
                             input: '$productDetails',

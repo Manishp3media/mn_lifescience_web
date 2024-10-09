@@ -167,7 +167,7 @@ const Products = () => {
                                             className="object-fit w-[80px] h-[80px] mr-2"
                                         />
                                     ) : (
-                                        <div className="w-[80px] h-[80px] flex items-center justify-center">
+                                        <div className="w-[80px] h-[80px] flex items-center justify-center mr-2">
                                             <img src="/image.png" />
                                       </div>
                                         
