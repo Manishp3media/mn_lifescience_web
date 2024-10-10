@@ -86,7 +86,7 @@ const Products = () => {
                                     )}
                                     <div className="flex flex-col">
                                         <div className="font-medium">{product?.name}</div>
-                                        <div className="text-sm text-gray-500">{product?.category}</div>
+                                        <div className="text-sm text-gray-500">{product?.category.name}</div>
                                     </div>
                                 </div>
                             </TableCell>
@@ -106,7 +106,10 @@ const Products = () => {
             </Table>
 
             {/* Edit Product Modal */}
-            <EditProduct isOpen={openEditModal} product={selectedProduct} onClose={() => setOpenEditModal(false)} />
+            <EditProduct isOpen={openEditModal} product={selectedProduct} onClose={() => {
+                    setOpenEditModal(false);
+                    setSelectedProduct(null);
+                }}  />
         </div>
     );
 };

@@ -70,8 +70,8 @@ const EditProduct = ({ isOpen, onClose, product }) => {
         },
     });
 
-    const handleCategorySelect = (category) => {
-        formik.setFieldValue("category", category);
+    const handleCategorySelect = (categoryId, categoryName) => {
+        formik.setFieldValue("category", categoryId);
     };
 
     const handleFileChange = (e) => {
@@ -120,13 +120,13 @@ const EditProduct = ({ isOpen, onClose, product }) => {
                     <div>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline">{formik?.values?.category || "Select Category"}</Button>
+                                <Button variant="outline"> {categories.find(cat => cat._id === formik.values.category)?.name || "Select Category"}</Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 {categories?.map((category) => (
                                     <DropdownMenuItem
                                         key={category._id}
-                                        onClick={() => handleCategorySelect(category?.name)}
+                                        onClick={() => handleCategorySelect(category._id, category?.name)}
                                     >
                                         {category?.name}
                                     </DropdownMenuItem>

@@ -83,11 +83,14 @@ export const getAllProducts = async (req, res) => {
                     sku: 1,
                     status: 1,
                     productImage: 1,
-                    "category": "$categoryDetails.name" // Include only the name of the category
+                    category: { // Include the category object with _id and name
+                        _id: "$categoryDetails._id",
+                        name: "$categoryDetails.name"
+                    }
                 }
             },
             {
-                $sort: { createdBy: -1 }
+                $sort: { createdAt: -1 }
             }
         ]);
 
