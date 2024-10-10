@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import moment from "moment";
 
 // Fetch all products
 export const fetchProducts = createAsyncThunk(
@@ -16,8 +15,8 @@ export const fetchProducts = createAsyncThunk(
             },
           }
         );
-        // Assuming the server returns { products: [...] }
-        return response.data.products; // Adjust this based on your server's response structure
+        
+        return response.data.products; structure
       } catch (error) {
         return rejectWithValue(error.response?.data || "Failed to fetch products");
       }
