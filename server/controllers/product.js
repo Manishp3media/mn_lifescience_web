@@ -43,6 +43,9 @@ export const createProduct = async (req, res) => {
         // Save product to database
         await product.save();
 
+         // Populate the category name before sending the response
+         await product.populate('category', 'name');
+
         res.status(201).json({ message: "Product created successfully", product });
     } catch (err) { 
         console.error(err); //

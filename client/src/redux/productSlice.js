@@ -63,7 +63,7 @@ export const updateProduct = createAsyncThunk(
           },
         }
       );
-      return updatedProduct;
+      return response.data.product;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to update product");
     }
@@ -145,6 +145,7 @@ const productListSlice = createSlice({
         state.status = "loading";
       })
       .addCase(updateProduct.fulfilled, (state, action) => {
+        state.status = "succeeded";
         const index = state.products.findIndex(
           (product) => product._id === action.payload._id
         );

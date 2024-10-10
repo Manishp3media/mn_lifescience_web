@@ -151,6 +151,9 @@ export const editProduct = async (req, res) => {
         // Save the updated product
         await product.save();
 
+         // Populate the category name before sending the response
+         await product.populate('category', 'name');
+
         res.status(200).json({ message: "Product updated successfully", product });
     } catch (err) {
         console.error(err);

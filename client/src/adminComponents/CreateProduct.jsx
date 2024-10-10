@@ -97,7 +97,7 @@ const CreateProduct = ({ isOpen, onClose }) => {
                     <div>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline">{formik.values.category || "Select Category"}</Button>
+                                <Button variant="outline">{formik?.values?.category || "Select Category"}</Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 {categories?.map((category) => (

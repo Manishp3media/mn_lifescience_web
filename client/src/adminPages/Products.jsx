@@ -2,14 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AdminNavbar from "@/adminComponents/AdminNavbar";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
     Table,
     TableBody,
     TableCell,
@@ -19,7 +11,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { fetchProducts } from '@/redux/productSlice';
-import { Ellipsis, Edit, Delete } from "lucide-react";
+import EditProduct from "@/adminComponents/EditProduct";
+import ActionDropdown from "@/adminComponents/ActionDropdown";
 
 const Products = () => {
     const dispatch = useDispatch();
@@ -29,11 +22,8 @@ const Products = () => {
         error
     } = useSelector(state => state.productList || {});
     const [searchTerm, setSearchTerm] = useState('');
-    const [openEllipsis, setOpenEllipsis] = useState(false);
-
-    const handleEllipsisClick = () => {
-        setOpenEllipsis(!openEllipsis);
-    };
+    const [openEditModal, setOpenEditModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     const handleSearch = (searchTerm) => {
         setSearchTerm(searchTerm);
@@ -48,6 +38,17 @@ const Products = () => {
             product?.name?.toLowerCase().includes(searchTerm.toLowerCase()))
         : [];
 
+    const handleEditClick = (product) => {
+        setSelectedProduct(product);
+        setOpenEditModal(true);
+    };
+
+    // const handleDeleteClick = (productId) => {
+    //     if (window.confirm("Are you sure you want to delete this product?")) {
+    //         dispatch(deleteProduct(productId));
+    //     }
+    // };
+
     // if (status === 'loading') {
     //     return <div>Loading...</div>;
     // }
@@ -55,7 +56,7 @@ const Products = () => {
     return (
         <div >
             <AdminNavbar title="Products" onSearch={handleSearch} />
-           
+
             <Table className="mt-4">
                 <TableHeader>
                     <TableRow>
@@ -80,8 +81,8 @@ const Products = () => {
                                     ) : (
                                         <div className="w-[80px] h-[80px] flex items-center justify-center mr-2">
                                             <img src="/upload.jpg" />
-                                      </div>
-                                        
+                                        </div>
+
                                     )}
                                     <div className="flex flex-col">
                                         <div className="font-medium">{product?.name}</div>
@@ -93,7 +94,10 @@ const Products = () => {
                             <TableCell>{product?.sku}</TableCell>
                             <TableCell>{product?.description}</TableCell>
                             <TableCell>
-                                <Ellipsis onClick={handleEllipsisClick} />
+                                <ActionDropdown
+                                    onEdit={() => handleEditClick(product)}
+                                    // onDelete={() => handleDeleteClick(product._id)}
+                                />
                             </TableCell>
                         </TableRow>
 
@@ -101,20 +105,8 @@ const Products = () => {
                 </TableBody>
             </Table>
 
-            {openEllipsis && (
-                <DropdownMenu>
-                    <DropdownMenuContent>
-                        <DropdownMenuItem>
-                            <Edit className="w-4 h-4 mr-2" />
-                            <span>Edit</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                            <Delete className="w-4 h-4 mr-2" />
-                            <span>Delete</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )}
+            {/* Edit Product Modal */}
+            <EditProduct isOpen={openEditModal} product={selectedProduct} onClose={() => setOpenEditModal(false)} />
         </div>
     );
 };
