@@ -20,8 +20,7 @@ const productSchema = new mongoose.Schema({
         default: "draft"
     },
     sku: {
-        type: String,
-        unique: true,
+        type: String
     },
     productImage: {
         type: String,

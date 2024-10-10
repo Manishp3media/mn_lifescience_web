@@ -58,7 +58,7 @@ const Sidebar = () => {
             </li>
             <li>
               <Link
-                to="products"
+                to="/admin/dashboard/products"
                 className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group ${
                   isActiveRoute("/admin/dashboard/products") ? "bg-gray-100 dark:bg-gray-700" : ""
                 }`}
@@ -71,7 +71,7 @@ const Sidebar = () => {
             </li>
             <li>
               <Link
-                to="/admin/dashboard/called-list"
+                to="/admin/dashboard/users"
                 className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group ${
                   isActiveRoute("/admin/dashboard/called-list") ? "bg-gray-100 dark:bg-gray-700" : ""
                 }`}
@@ -84,7 +84,7 @@ const Sidebar = () => {
             </li>
             <li>
               <Link
-                to="/admin/dashboard/mr-list"
+                to="/admin/dashboard/admin-options"
                 className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group ${
                   isActiveRoute("/admin/dashboard/mr-list") ? "bg-gray-100 dark:bg-gray-700" : ""
                 }`}

@@ -3,6 +3,7 @@ import cloudinary from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import dotenv from 'dotenv';
 import Product from "../models/Product.js";
+import Category from "../models/Category.js";
 
 dotenv.config(); 
 
@@ -71,7 +72,7 @@ export const upload = multer({
         const deletedProduct = await Product.findByIdAndDelete(id);
         if (deletedProduct) {
             console.log(`Product with ID ${id} deleted successfully from the database.`);
-            res.status(200).json({ message: "Product deleted successfully" });
+            res.status(200).json({ message: "Product deleted successfully", id: id });
         } else {
             console.log(`Product with ID ${id} not found in the database during deletion.`);
             res.status(404).json({ message: "Product not found during deletion" });
@@ -81,3 +82,78 @@ export const upload = multer({
         res.status(500).json({ error: err.message });
     }
 };
+
+// Edit Product
+export const editProduct = async (req, res) => {
+    try {
+        const { id, name, description, category: CategoryName, composition, use, sku } = req.body;
+
+        // Check if product exists
+        const product = await Product.findById(id);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        // Check if SKU is provided and validate
+        if (sku && sku !== product.sku) {
+            const existingProduct = await Product.findOne({ sku, _id: { $ne: id } });
+            if (existingProduct) {
+                return res.status(400).json({ message: "SKU already exists" });
+            }
+            product.sku = sku; // Update SKU if different from current value
+        }
+
+        // Check if category name is provided and validate
+        if (CategoryName) {
+            const category = await Category.findOne({ name: CategoryName.toLowerCase() });
+            if (!category) {
+                return res.status(410).json({ message: "Category not found" });
+            }
+            if (product.category.toString() !== category._id.toString()) {
+                product.category = category._id; // Update category if different from current value
+            }
+        }
+
+        // Handle product image update (if provided)
+        if (req.files && req.files["productImage"]) {
+            const newImage = req.files["productImage"][0].path;
+
+            // If the product already has an image, delete the old one from Cloudinary
+            if (product.productImage) {
+                const urlParts = product.productImage.split('/');
+                const folderAndFile = urlParts.slice(-2).join('/');
+                const publicId = folderAndFile.split('.')[0]; // Remove file extension
+
+                try {
+                    const deletionResult = await cloudinary.v2.uploader.destroy(publicId);
+                    if (deletionResult.result === 'ok') {
+                        console.log(`Previous image deleted successfully from Cloudinary.`);
+                    } else if (deletionResult.result === 'not found') {
+                        console.log(`Previous image not found in Cloudinary. It may have been deleted already.`);
+                    } else {
+                        console.error(`Unexpected result from Cloudinary deletion:`, deletionResult);
+                    }
+                } catch (cloudinaryError) {
+                    console.error(`Error deleting old image from Cloudinary:`, cloudinaryError);
+                }
+            }
+
+            // Update product image with the new image path
+            product.productImage = newImage;
+        }
+
+        // Update product fields only if the provided value is different from the current one
+        if (name && name !== product.name) product.name = name;
+        if (description && description !== product.description) product.description = description;
+        if (composition && composition !== product.composition) product.composition = composition;
+        if (use && use !== product.use) product.use = use;
+
+        // Save the updated product
+        await product.save();
+
+        res.status(200).json({ message: "Product updated successfully", product });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+}

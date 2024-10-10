@@ -1,8 +1,8 @@
 import express from "express";
-import { createProduct, getAllProducts, getProductsByCategory, getProductById, editProduct } from "../controllers/product.js";
+import { createProduct, getAllProducts, getProductsByCategory, getProductById, updateProductStatus } from "../controllers/product.js";
 import authMiddleware from "../middleware/auth.js";
 import { uploadProductImage } from "../middleware/uploadDocuments.js";
-import { deleteProduct } from "../utils/cloudinary.js";
+import { deleteProduct, editProduct } from "../utils/cloudinary.js";
 
 const router = express.Router();
 
@@ -26,5 +26,8 @@ router.delete("/admin/delete/product",authMiddleware('admin'), deleteProduct);
 
 // Edit Product
 router.patch("/admin/edit/product",authMiddleware('admin'), uploadProductImage, editProduct);
+
+// Update Product Status
+router.put('/api/products/update-status', updateProductStatus);
 
 export default router;

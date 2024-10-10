@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AdminNavbar from "@/adminComponents/AdminNavbar";
-import { Input } from "@/components/ui/input";
-import { Search, X } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -20,69 +18,43 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { fetchProducts, setSelectedCategory, setSelectedStatus } from '@/redux/productSlice';
-import { Image, Ellipsis} from "lucide-react";
+import { fetchProducts } from '@/redux/productSlice';
+import { Ellipsis, Edit, Delete } from "lucide-react";
 
 const Products = () => {
     const dispatch = useDispatch();
     const {
-        products = [],
         filteredProducts = [],
-        selectedCategory,
-        selectedStatus,
         status,
         error
     } = useSelector(state => state.productList || {});
     const [searchTerm, setSearchTerm] = useState('');
+    const [openEllipsis, setOpenEllipsis] = useState(false);
+
+    const handleEllipsisClick = () => {
+        setOpenEllipsis(!openEllipsis);
+    };
+
+    const handleSearch = (searchTerm) => {
+        setSearchTerm(searchTerm);
+    };
 
     useEffect(() => {
         dispatch(fetchProducts());
     }, [dispatch]);
-
-    const handleSearch = (event) => {
-        setSearchTerm(event.target.value);
-    };
-
-    const handleCategoryFilter = (category) => {
-        dispatch(setSelectedCategory(category));
-    };
-
-    const handleStatusFilter = (status) => {
-        dispatch(setSelectedStatus(status));
-    };
-
-    const clearFilter = (filterType) => {
-        if (filterType === 'category') {
-            dispatch(setSelectedCategory(null));
-        } else if (filterType === 'status') {
-            dispatch(setSelectedStatus(null));
-        }
-    };
 
     const filteredAndSearchedProducts = Array.isArray(filteredProducts)
         ? filteredProducts?.filter(product =>
             product?.name?.toLowerCase().includes(searchTerm.toLowerCase()))
         : [];
 
-    const uniqueCategories = Array.isArray(products)
-        ? [...new Set(products.map(product => product.category))]
-        : [];
-    const uniqueStatuses = Array.isArray(products)
-        ? [...new Set(products.map(product => product.status))]
-        : [];
-
     // if (status === 'loading') {
     //     return <div>Loading...</div>;
     // }
 
-    // if (status === 'failed') {
-    //     return <div>Error: {error}</div>;
-    // }
-
     return (
         <div >
-            <AdminNavbar title="Products" />
+            <AdminNavbar title="Products" onSearch={handleSearch} />
            
             <Table className="mt-4">
                 <TableHeader>
@@ -121,15 +93,28 @@ const Products = () => {
                             <TableCell>{product?.sku}</TableCell>
                             <TableCell>{product?.description}</TableCell>
                             <TableCell>
-                                <Ellipsis />
+                                <Ellipsis onClick={handleEllipsisClick} />
                             </TableCell>
                         </TableRow>
 
                     ))}
                 </TableBody>
-
-
             </Table>
+
+            {openEllipsis && (
+                <DropdownMenu>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem>
+                            <Edit className="w-4 h-4 mr-2" />
+                            <span>Edit</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <Delete className="w-4 h-4 mr-2" />
+                            <span>Delete</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )}
         </div>
     );
 };
