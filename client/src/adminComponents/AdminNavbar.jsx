@@ -50,10 +50,10 @@ const AdminNavbar = ({ title, onSearch }) => {
     };
 
     const uniqueCategories = Array.isArray(products)
-        ? [...new Set(products.map(product => product.category))]
+        ? [...new Set(products?.map(product => product?.category?.name))]
         : [];
     const uniqueStatuses = Array.isArray(products)
-        ? [...new Set(products.map(product => product.status))]
+        ? [...new Set(products?.map(product => product?.status))]
         : [];
 
     return (

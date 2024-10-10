@@ -70,27 +70,33 @@ export const updateProduct = createAsyncThunk(
   }
 );
 
-// Delete a product
 export const deleteProduct = createAsyncThunk(
   "productList/deleteProduct",
-  async ({ id }, { rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
+      console.log("Attempting to delete product with ID:", id); // Step 1: Initiate delete request
       const token = localStorage.getItem("token");
-      await axios.delete(
+
+      const response = await axios.delete(
         "https://mn-life-catalogue.vercel.app/api/admin/delete/product",
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json", 
           },
           data: { id },
         }
       );
+
+      console.log("Delete request succeeded, response:", response.data); // Step 2: Request success
       return id;
     } catch (error) {
+      console.error("Error during delete request:", error); // Step 3: Catch and log error
       return rejectWithValue(error.response?.data || "Failed to delete product");
     }
   }
 );
+
 
 const productListSlice = createSlice({
   name: "productList",
@@ -101,6 +107,7 @@ const productListSlice = createSlice({
     selectedStatus: null,
     status: "idle",
     error: null,
+    deleteStatus: "idle",
   },
   reducers: {
     setSelectedCategory: (state, action) => {
@@ -159,19 +166,19 @@ const productListSlice = createSlice({
         state.error = action.payload;
       })
       .addCase(deleteProduct.pending, (state) => {
-        state.status = "loading";
+        state.deleteStatus = "loading";
       })
       .addCase(deleteProduct.fulfilled, (state, action) => {
+          state.deleteStatus = "succeeded";
         state.products = state.products.filter(
           (product) => product._id !== action.payload
         );
         state.filteredProducts = state.filteredProducts.filter(
           (product) => product._id !== action.payload
         );
-        state.status = "succeeded";
       })
       .addCase(deleteProduct.rejected, (state, action) => {
-        state.status = "failed";
+        state.deleteStatus = "failed";
         state.error = action.payload;
       });
   },
@@ -184,7 +191,7 @@ const filterProducts = (state) => {
     
     return products.filter((product) => {
       const matchesCategory = state.selectedCategory
-        ? product.category === state.selectedCategory
+        ? product.category.name === state.selectedCategory
         : true;
       const matchesStatus = state.selectedStatus
         ? product.status === state.selectedStatus

@@ -10,16 +10,19 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { fetchProducts } from '@/redux/productSlice';
+import { fetchProducts, deleteProduct } from '@/redux/productSlice';
 import EditProduct from "@/adminComponents/EditProduct";
 import ActionDropdown from "@/adminComponents/ActionDropdown";
+import { Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 const Products = () => {
     const dispatch = useDispatch();
     const {
         filteredProducts = [],
         status,
-        error
+        error,
+        deleteStatus,
     } = useSelector(state => state.productList || {});
     const [searchTerm, setSearchTerm] = useState('');
     const [openEditModal, setOpenEditModal] = useState(false);
@@ -43,11 +46,27 @@ const Products = () => {
         setOpenEditModal(true);
     };
 
-    // const handleDeleteClick = (productId) => {
-    //     if (window.confirm("Are you sure you want to delete this product?")) {
-    //         dispatch(deleteProduct(productId));
-    //     }
-    // };
+    const handleDeleteClick = async (id) => {
+        console.log("Delete click initiated for product ID:", id); // Step 1: Initiating delete
+    
+        if (window.confirm("Are you sure you want to delete this product?")) {
+            console.log("User confirmed deletion for product ID:", id); // Step 2: User confirmed
+    
+            try {
+                console.log("Dispatching deleteProduct action for product ID:", id); // Step 3: Dispatching delete action
+                const result = await dispatch(deleteProduct(id)).unwrap();
+                console.log("Delete successful, result:", result);  // Step 4: Delete success
+                toast.success("Product deleted successfully");
+            } catch (error) {
+                console.error("Delete failed, error:", error); // Step 5: Handle error
+                toast.error(error?.message || "Failed to delete product");
+            }
+        } else {
+            console.log("User canceled deletion for product ID:", id); // Step 6: User canceled deletion
+        }
+    };
+    
+    
 
     // if (status === 'loading') {
     //     return <div>Loading...</div>;
@@ -94,10 +113,14 @@ const Products = () => {
                             <TableCell>{product?.sku}</TableCell>
                             <TableCell>{product?.description}</TableCell>
                             <TableCell>
-                                <ActionDropdown
-                                    onEdit={() => handleEditClick(product)}
-                                    // onDelete={() => handleDeleteClick(product._id)}
-                                />
+                                {deleteStatus === "loading" ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <ActionDropdown
+                                        onEdit={() => handleEditClick(product)}
+                                        onDelete={() => handleDeleteClick(product._id)}
+                                    />
+                                )}
                             </TableCell>
                         </TableRow>
 

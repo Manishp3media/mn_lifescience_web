@@ -69,7 +69,7 @@ const enquiryListSlice = createSlice({
       .addCase(fetchEnquiries.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.enquiries = action.payload;
-        state.filteredEnquiries = filteredEnquiries(state);
+        // state.filteredEnquiries = filteredEnquiries(state);
       })
       .addCase(fetchEnquiries.rejected, (state, action) => {
         state.status = "failed";

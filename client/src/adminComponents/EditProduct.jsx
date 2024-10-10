@@ -33,7 +33,7 @@ const EditProduct = ({ isOpen, onClose, product }) => {
             description: product?.description || "",
             composition: product?.composition || "",
             sku: product?.sku || "",
-            category: product?.category || "",
+            category: product?.category?._id || "",
             productImage: null,
         },
         validationSchema: Yup.object({
@@ -54,8 +54,7 @@ const EditProduct = ({ isOpen, onClose, product }) => {
                 }
             }
             try {
-                // Only update product if product ID exists
-                const resultAction = await dispatch(updateProduct(data)).unwrap();
+                await dispatch(updateProduct(data)).unwrap();
                 toast.success("Product updated successfully");
                 formik.resetForm();
                 onClose();
@@ -72,7 +71,7 @@ const EditProduct = ({ isOpen, onClose, product }) => {
         },
     });
 
-    const handleCategorySelect = (categoryId, categoryName) => {
+    const handleCategorySelect = (categoryId) => {
         formik.setFieldValue("category", categoryId);
     };
 
@@ -89,7 +88,7 @@ const EditProduct = ({ isOpen, onClose, product }) => {
                 description: product?.description,
                 composition: product?.composition,
                 sku: product?.sku,
-                category: product?.category,
+                category: product?.category?._id || "",
                 productImage: null, // Reset image on edit
             });
         }

@@ -63,19 +63,13 @@ const Enquiries = () => {
         }
     };
 
-    // const applyDateFilter = () => {
-    //     dispatch(setDateRange({ startDate: new Date(tempStartDate), endDate: new Date(tempEndDate) }));
-    //     setIsOpen(false);
-    // };
-
     const applyDateFilter = () => {
         dispatch(setDateRange({
-            startDate: tempStartDate ? new Date(tempStartDate) : null,
-            endDate: tempEndDate ? new Date(tempEndDate) : null
+            startDate: tempStartDate ? moment(tempStartDate).startOf('day').toISOString() : null,
+            endDate: tempEndDate ? moment(tempEndDate).endOf('day').toISOString() : null
         }));
         setIsOpen(false);
     };
-
 
     const clearFilter = (filterType) => {
         switch (filterType) {
@@ -99,9 +93,13 @@ const Enquiries = () => {
 
     const filteredEnquiries = useMemo(() => {
         return enquiries.filter(enquiry => {
-            const enquiryDate = new Date(enquiry.createdAt);
-            const isInDateRange = !dateRange.startDate || !dateRange.endDate &&
-                (!dateRange.endDate || enquiryDate <= dateRange.endDate);
+            const enquiryDate = moment(enquiry.createdAt).startOf('day');
+            const startDate = dateRange.startDate ? moment(dateRange.startDate).startOf('day') : null;
+            const endDate = dateRange.endDate ? moment(dateRange.endDate).startOf('day') : null;
+
+            const isInDateRange = !startDate || !endDate || 
+                (enquiryDate.isSameOrAfter(startDate) && enquiryDate.isSameOrBefore(endDate));
+
 
             const matchesCity = !selectedCity || enquiry.user.city === selectedCity;
             const matchesUser = !selectedUser || enquiry.user.name === selectedUser;
@@ -112,6 +110,7 @@ const Enquiries = () => {
 
     const uniqueCities = useMemo(() => [...new Set(enquiries.map(enquiry => enquiry.user.city))], [enquiries]);
     const uniqueUsers = useMemo(() => [...new Set(enquiries.map(enquiry => enquiry.user.name))], [enquiries]);
+      
 
     if (status === 'loading') {
         return <div>Loading...</div>;
