@@ -50,9 +50,11 @@ const EditProduct = ({ isOpen, onClose, product }) => {
             for (const key in values) {
                 if (values[key] !== null && values[key] !== undefined) {
                     data.append(key, values[key]);
+                    console.log(key, values[key]);
                 }
             }
             try {
+                // Only update product if product ID exists
                 const resultAction = await dispatch(updateProduct(data)).unwrap();
                 toast.success("Product updated successfully");
                 formik.resetForm();
@@ -120,15 +122,17 @@ const EditProduct = ({ isOpen, onClose, product }) => {
                     <div>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline"> {categories.find(cat => cat._id === formik.values.category)?.name || "Select Category"}</Button>
+                                <Button variant="outline">
+                                    {categories.find(cat => cat._id === formik.values.category)?.name || "Select Category"}
+                                </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 {categories?.map((category) => (
                                     <DropdownMenuItem
                                         key={category._id}
-                                        onClick={() => handleCategorySelect(category._id, category?.name)}
+                                        onClick={() => handleCategorySelect(category._id, category.name)}
                                     >
-                                        {category?.name}
+                                        {category.name}
                                     </DropdownMenuItem>
                                 ))}
                             </DropdownMenuContent>

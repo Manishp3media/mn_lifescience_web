@@ -86,7 +86,7 @@ export const upload = multer({
 // Edit Product
 export const editProduct = async (req, res) => {
     try {
-        const { id, name, description, category: CategoryName, composition, use, sku } = req.body;
+        const { id, name, description, category, composition, use, sku } = req.body;
 
         // Check if product exists
         const product = await Product.findById(id);
@@ -103,15 +103,13 @@ export const editProduct = async (req, res) => {
             product.sku = sku; // Update SKU if different from current value
         }
 
-        // Check if category name is provided and validate
-        if (CategoryName) {
-            const category = await Category.findOne({ name: CategoryName.toLowerCase() });
-            if (!category) {
-                return res.status(410).json({ message: "Category not found" });
+        // Check if category ID is provided and validate
+        if (category) {
+            const categoryExists = await Category.findById(category);
+            if (!categoryExists) {
+                return res.status(404).json({ message: "Category not found" });
             }
-            if (product.category.toString() !== category._id.toString()) {
-                product.category = category._id; // Update category if different from current value
-            }
+            product.category = category;
         }
 
         // Handle product image update (if provided)
