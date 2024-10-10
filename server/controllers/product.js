@@ -43,7 +43,7 @@ export const createProduct = async (req, res) => {
         // Save product to database
         await product.save();
 
-        res.status(201).json({ message: "Product created successfully" });
+        res.status(201).json({ message: "Product created successfully", product });
     } catch (err) { 
         console.error(err); //
         if (err instanceof z.ZodError) {
@@ -82,6 +82,9 @@ export const getAllProducts = async (req, res) => {
                     productImage: 1,
                     "category": "$categoryDetails.name" // Include only the name of the category
                 }
+            },
+            {
+                $sort: { createdBy: -1 }
             }
         ]);
 
