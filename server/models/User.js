@@ -36,7 +36,13 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
     },
+    clinicName: {
+        type: String
+    },
     city: {
+        type: String
+    },
+    speciality: {
         type: String
     },
     role: { 

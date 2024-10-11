@@ -9,7 +9,7 @@ export const userSignup = async (req, res) => {
     try {
         // Validate input
         userSignupSchema.parse(req.body);
-        const { name, mobileNumber, city } = req.body;
+        const { name, mobileNumber, city, clinicName, speciality } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ mobileNumber });
@@ -24,7 +24,7 @@ export const userSignup = async (req, res) => {
         res.status(200).json({ message: 'OTP generated successfully', otp });
         
         // Save the user temporarily (could also create an OTP expiration logic if needed)
-        const newUser = new User({ name, mobileNumber, city });
+        const newUser = new User({ name, mobileNumber, city, clinicName, speciality });
         await newUser.save();
     } catch (err) {
         if (err instanceof z.ZodError) {

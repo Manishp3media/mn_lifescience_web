@@ -8,3 +8,7 @@ export const uploadProductImage = upload.fields([
 export const uploadBannerImage = upload.fields([
     { name: "bannerImage", maxCount: 1 } 
 ]);
+
+export const uploadLogoImage = upload.fields([
+    { name: "logoImage", maxCount: 1 } 
+]);

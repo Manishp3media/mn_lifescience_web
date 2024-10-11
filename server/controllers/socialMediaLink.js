@@ -2,7 +2,6 @@ import { SocialMediaLink } from "../models/SocialMediaLink.js";
 import { z } from "zod";
 import { socialMediaLinkSchema } from "../validation/socialMediaLink.js";
 
-
 // Add social media link
 export const addSocialMediaLink = async (req, res) => {
     try {
