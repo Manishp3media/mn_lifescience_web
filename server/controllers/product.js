@@ -56,22 +56,21 @@ export const createProduct = async (req, res) => {
     }
 }
 
-// Get All Products
 export const getAllProducts = async (req, res) => {
     try {
         const products = await Product.aggregate([
             {
                 $lookup: {
-                    from: "categories", // The name of the Category collection
-                    localField: "category", // Field from the Product schema
-                    foreignField: "_id", // Field from the Category schema
-                    as: "categoryDetails" // Output array field
+                    from: "categories",
+                    localField: "category",
+                    foreignField: "_id",
+                    as: "categoryDetails"
                 }
             },
             {
-                $unwind: { // Unwind to get category details in a single object instead of an array
+                $unwind: {
                     path: "$categoryDetails",
-                    preserveNullAndEmptyArrays: true // Keeps products without categories
+                    preserveNullAndEmptyArrays: true
                 }
             },
             {
@@ -83,7 +82,8 @@ export const getAllProducts = async (req, res) => {
                     sku: 1,
                     status: 1,
                     productImage: 1,
-                    category: { // Include the category object with _id and name
+                    createdAt: 1, // Ensure createdAt is included
+                    category: {
                         _id: "$categoryDetails._id",
                         name: "$categoryDetails.name"
                     }
@@ -99,6 +99,7 @@ export const getAllProducts = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
 
 // Get Products By Category
 export const getProductsByCategory = async (req, res) => {

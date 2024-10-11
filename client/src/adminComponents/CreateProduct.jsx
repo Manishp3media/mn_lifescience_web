@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 
 const CreateProduct = ({ isOpen, onClose }) => {
     const dispatch = useDispatch();
-    const { categories, status } = useSelector((state) => state.categoryList); // Accessing categories and status from Redux store
+    const { categories, status } = useSelector((state) => state.categoryList); 
     const [isCreating, setIsCreating] = useState(false);
 
     useEffect(() => {

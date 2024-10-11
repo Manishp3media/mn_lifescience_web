@@ -39,7 +39,7 @@ export const fetchCategories = createAsyncThunk(
             },
           }
         );
-        return response.data;
+        return response.data.category;
       } catch (error) {
         return rejectWithValue(error.response?.data || "Failed to create category");
       }

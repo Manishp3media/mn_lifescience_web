@@ -86,7 +86,7 @@ const Products = () => {
                         <TableHead>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
-                <TableBody className="text-base font-sm">
+                <TableBody >
                     {filteredAndSearchedProducts.map((product) => (
                         <TableRow key={product?._id}>
                             <TableCell>
