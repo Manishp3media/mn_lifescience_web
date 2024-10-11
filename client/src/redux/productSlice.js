@@ -23,7 +23,6 @@ export const fetchProducts = createAsyncThunk(
     }
   );
   
-
 // Create a product
 export const createProduct = createAsyncThunk(
   "productList/createProduct",

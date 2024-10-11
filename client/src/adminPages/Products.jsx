@@ -27,6 +27,7 @@ const Products = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [openEditModal, setOpenEditModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [laodingProductId, setLoadingProductId] = useState(null);
 
     const handleSearch = (searchTerm) => {
         setSearchTerm(searchTerm);
@@ -47,26 +48,22 @@ const Products = () => {
     };
 
     const handleDeleteClick = async (id) => {
-        console.log("Delete click initiated for product ID:", id); // Step 1: Initiating delete
-    
-        if (window.confirm("Are you sure you want to delete this product?")) {
-            console.log("User confirmed deletion for product ID:", id); // Step 2: User confirmed
-    
-            try {
-                console.log("Dispatching deleteProduct action for product ID:", id); // Step 3: Dispatching delete action
-                const result = await dispatch(deleteProduct(id)).unwrap();
-                console.log("Delete successful, result:", result);  // Step 4: Delete success
-                toast.success("Product deleted successfully");
-            } catch (error) {
-                console.error("Delete failed, error:", error); // Step 5: Handle error
-                toast.error(error?.message || "Failed to delete product");
-            }
-        } else {
-            console.log("User canceled deletion for product ID:", id); // Step 6: User canceled deletion
+        
+        setLoadingProductId(id);
+        
+        try {
+           
+            const result = await dispatch(deleteProduct(id)).unwrap();
+           
+            toast.success("Product deleted successfully");
+        } catch (error) {
+
+            toast.error(error?.message || "Failed to delete product");
+        } finally {
+            // Reset loading product ID after the operation
+            setLoadingProductId(null);
         }
     };
-    
-    
 
     // if (status === 'loading') {
     //     return <div>Loading...</div>;
@@ -113,7 +110,7 @@ const Products = () => {
                             <TableCell>{product?.sku}</TableCell>
                             <TableCell>{product?.description}</TableCell>
                             <TableCell>
-                                {deleteStatus === "loading" ? (
+                                {laodingProductId === product?._id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
                                     <ActionDropdown
