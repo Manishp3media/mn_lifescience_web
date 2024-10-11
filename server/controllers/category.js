@@ -20,7 +20,7 @@ export const createCategory = async (req, res) => {
         const category = new Category({ name: categoryName });
         await category.save();   // Save category to database
 
-        res.status(201).json({ message: 'Category created successfully' });
+        res.status(201).json({ message: 'Category created successfully', category });
 
     } catch (err) { 
         if (err instanceof z.ZodError) {

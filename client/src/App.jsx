@@ -8,6 +8,7 @@ import Sidebar from "./adminComponents/Sidebar";
 import Products from "./adminPages/Products";
 import Enquiries from "./adminPages/Enquries";
 import Users from "./adminPages/Users";
+import Categories from "./adminPages/Categories";
 
 const DashboardLayout = () => {
   return (
@@ -18,6 +19,7 @@ const DashboardLayout = () => {
           <Route path="products" element={<Products />} />
           <Route path="enquiries" element={<Enquiries />} />
           <Route path="users" element={<Users />} />
+          <Route path="categories" element={<Categories />} />
           {/* Add more routes for other dashboard pages here */}
         </Routes>
       </div>

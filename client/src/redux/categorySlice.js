@@ -22,10 +22,35 @@ export const fetchCategories = createAsyncThunk(
     }
   );
 
+
+  // API call to create category
+  export const createCategory = createAsyncThunk(
+    "category/createCategory",
+    async (categoryData, { rejectWithValue }) => {
+      const token = localStorage.getItem("token");
+      
+      try {
+        const response = await axios.post(
+          "https://mn-life-catalogue.vercel.app/api/admin/create/category",
+          categoryData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        return response.data;
+      } catch (error) {
+        return rejectWithValue(error.response?.data || "Failed to create category");
+      }
+    }
+  );
+
   const cateogorySlice = createSlice({
     name: "categoryList",
     initialState: {
       categories: [],
+      createCategoryLoading: false,
     },
     extraReducers: (builder) => {
       builder
@@ -40,6 +65,17 @@ export const fetchCategories = createAsyncThunk(
           state.status = "failed";
           state.error = action.payload;
         })
+        .addCase(createCategory.pending, (state) => {
+          state.createCategoryLoading = true;
+          
+        })  
+        .addCase(createCategory.fulfilled, (state, action) => {
+          state.createCategoryLoading = false;
+          state.categories.push(action.payload);
+        })
+        .addCase(createCategory.rejected, (state, action) => {
+          state.createCategoryLoading = false;
+        });
     },
   });
 
