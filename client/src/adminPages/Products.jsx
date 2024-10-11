@@ -90,7 +90,7 @@ const Products = () => {
                     {filteredAndSearchedProducts.map((product) => (
                         <TableRow key={product?._id}>
                             <TableCell>
-                                <div className="flex items-center">
+                                <div className="flex items-center ml-1">
                                     {product?.productImage ? (
                                         <img
                                             src={product?.productImage}

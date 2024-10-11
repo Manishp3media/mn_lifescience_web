@@ -1,28 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Search, X } from "lucide-react";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import CreateProduct from "./CreateProduct";
-import { fetchProducts, setSelectedCategory, setSelectedStatus } from '@/redux/productSlice';
+import { Plus} from "lucide-react";
+import AddBanner from "./AddBanner";
 
-const AdminOptionsNavbar = ({ title, onSearch }) => {
-    const dispatch = useDispatch();
-    const [isModalOpen, setModalOpen] = useState(false);
 
-    const handleOpenModal = () => setModalOpen(true);
-    const handleCloseModal = () => setModalOpen(false);
+const AdminOptionsNavbar = () => {
+    const [isBannerModalOpen, setBannerModalOpen] = useState(false);
 
+      const handleOpenBannerModal = () => {
+        console.log("Opening Add Banner modal");
+        setBannerModalOpen(true);
+    };
+
+    const handleCloseBannerModal = () => {
+        console.log("Closing Add Banner modal");
+        setBannerModalOpen(false);
+    };
     return (
+        <div>
         <nav className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
@@ -38,14 +33,14 @@ const AdminOptionsNavbar = ({ title, onSearch }) => {
                     <div className="flex items-center space-x-4">
                         <Button
                             className="bg-green-500 hover:bg-green-600 text-white"
-                            onClick={handleOpenModal}
+                            onClick={handleOpenBannerModal}
                         >
                             <Plus className="mr-2 h-5 w-5" />
                             Add Banner
                         </Button>
                         <Button
                             className="bg-green-500 hover:bg-green-600 text-white"
-                            onClick={handleOpenModal}
+                            
                         >
                             <Plus className="mr-2 h-5 w-5" />
                             Add Social Media Links
@@ -54,8 +49,13 @@ const AdminOptionsNavbar = ({ title, onSearch }) => {
                 </div>
 
             </div>
-            {/* {isModalOpen && <CreateProduct isOpen={isModalOpen} onClose={handleCloseModal} />} */}
+            
         </nav>
+         {/* AddBanner modal */}
+         {isBannerModalOpen && (
+            <AddBanner isOpen={isBannerModalOpen} onClose={handleCloseBannerModal} />
+        )}
+        </div>
     );
 };
 

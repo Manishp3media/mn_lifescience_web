@@ -138,7 +138,7 @@ export const updateProductStatus = async (req, res) => {
         const { id, status } = req.body;
 
         // Validate the status input
-        if (!["published", "draft"].includes(status)) {
+        if (!["avaiable", "out of stock"].includes(status)) {
             return res.status(400).json({ message: "Invalid status value. Must be either 'published' or 'draft'." });
         }
 
@@ -160,3 +160,5 @@ export const updateProductStatus = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+// 
