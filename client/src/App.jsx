@@ -9,6 +9,7 @@ import Products from "./adminPages/Products";
 import Enquiries from "./adminPages/Enquries";
 import Users from "./adminPages/Users";
 import Categories from "./adminPages/Categories";
+import AdminOptions from "./adminPages/AdminOptions";
 
 const DashboardLayout = () => {
   return (
@@ -20,6 +21,7 @@ const DashboardLayout = () => {
           <Route path="enquiries" element={<Enquiries />} />
           <Route path="users" element={<Users />} />
           <Route path="categories" element={<Categories />} />
+          <Route path="admin-options" element={<AdminOptions />} />
           {/* Add more routes for other dashboard pages here */}
         </Routes>
       </div>

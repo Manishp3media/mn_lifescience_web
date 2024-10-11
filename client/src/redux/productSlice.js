@@ -16,7 +16,7 @@ export const fetchProducts = createAsyncThunk(
           }
         );
         
-        return response.data.products; structure
+        return response.data.products; 
       } catch (error) {
         return rejectWithValue(error.response?.data || "Failed to fetch products");
       }
@@ -40,9 +40,9 @@ export const createProduct = createAsyncThunk(
           },
         }
       );
-      return response.data;
+      return response.data.product;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to create product");
+      return rejectWithValue(error.response?.data?.message || "Failed to create product");
     }
   }
 );
@@ -141,7 +141,7 @@ const productListSlice = createSlice({
       })
       .addCase(createProduct.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.products.push(action.payload);
+        state.products.unshift(action.payload);
         state.filteredProducts = filterProducts(state);
       })
       .addCase(createProduct.rejected, (state, action) => {

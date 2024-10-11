@@ -8,6 +8,7 @@ import productRoutes from "./routes/product.js";
 import cartRoutes from "./routes/cart.js";
 import enquiryRoutes from "./routes/enquiry.js";
 import socialMedialLinkRoutes from "./routes/socialMediaLink.js"
+import bannerRoutes from "./routes/banner.js";
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -31,6 +32,7 @@ app.use("/api", productRoutes);
 app.use("/api", cartRoutes);
 app.use("/api", enquiryRoutes);
 app.use("/api", socialMedialLinkRoutes);
+app.use("/api", bannerRoutes);
 
 app.get("/", (req, res) => {
     res.json({ message: "Hello World from backend"});

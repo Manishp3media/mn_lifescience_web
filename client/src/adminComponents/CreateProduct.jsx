@@ -44,24 +44,27 @@ const CreateProduct = ({ isOpen, onClose }) => {
             for (const key in values) {
               data.append(key, values[key]);
             }
-      
+          
             try {
               await dispatch(createProduct(data)).unwrap();
               toast.success("Product created successfully");
               formik.resetForm();
             } catch (error) {
-                if (error.response && error.response.status === 400 && error.response.data.message.includes("SKU already exists")) {
-                    formik.setFieldError("sku", "SKU already exists. Please use a different one.");
-                } else {
-                    toast.error("Failed to create product");
-                }
-                console.error("Error creating product:", error);
+              
+              // The error message is now directly in the error object
+              const errorMessage = error || "Failed to create product";
+              
+              if (errorMessage === "SKU already exists") {
+                toast.error("SKU already exists. Please use a different one");
+              } else {
+                toast.error(errorMessage);
+              }
             } finally {
               setIsCreating(false);
               onClose();
             }
           },
-    });
+        })
 
     const handleCategorySelect = (category) => {
         formik.setFieldValue("category", category);

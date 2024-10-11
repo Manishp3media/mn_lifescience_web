@@ -4,30 +4,31 @@ import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { fetchCategories, createCategory } from "@/redux/categorySlice";
 import { Input } from "@/components/ui/input";
 import CustomSpinner from "@/adminComponents/CustomSpinner";
 import { toast } from "react-toastify";
+import { addSocialMediaLinks } from "@/redux/adminOptionsSlice";
+import { Facebook, Twitter, Instagram, LinkedIn, WhatsApp, YouTube } from "lucide-react";
 
-const CreateCategory = ({ isOpen, onClose }) => {
+const AddSocialMediaLinks = ({ isOpen, onClose }) => {
     const dispatch = useDispatch();
-    const { categories, createCategoryLoading } = useSelector((state) => state.categoryList); 
-    const [isCreating, setIsCreating] = useState(false);
-
+    
     // Formik with initial values and Yup validation schema
     const formik = useFormik({
         initialValues: {
-            name: "",
+            platform: "",
+            url: "",
         },
         validationSchema: Yup.object({
-            name: Yup.string().required("Category name is required"),
+            name: Yup.string().required("name is required"),
+            url: Yup.string().required("URL is required"),
         }),
         onSubmit: async (values) => {
             setIsCreating(true);
             const data = { ...values };
       
             try {
-              await dispatch(createCategory(data)).unwrap();
+              await dispatch(addSocialMediaLinks(data)).unwrap();
               toast.success("Product created successfully");
               formik.resetForm();
             } catch (error) {
@@ -48,12 +49,12 @@ const CreateCategory = ({ isOpen, onClose }) => {
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="text-color-[#386D62]">
                 <DialogHeader>
-                    <DialogTitle>Add New Category</DialogTitle>
+                    <DialogTitle>Add New Social Media Link</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={formik.handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block mb-1">Category Name</label>
+                        <label className="block">Product Name</label>
                         <Input
                             name="name"
                             value={formik.values.name}
@@ -81,4 +82,4 @@ const CreateCategory = ({ isOpen, onClose }) => {
     );
 };
 
-export default CreateCategory;
+export default AddSocialMediaLinks;
