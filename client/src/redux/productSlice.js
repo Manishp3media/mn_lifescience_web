@@ -69,6 +69,29 @@ export const updateProduct = createAsyncThunk(
   }
 );
 
+// Update Status
+export const updateStatus = createAsyncThunk(
+  "productList/updateStatus",
+  async ({id, status}, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.patch(
+        "https://mn-life-catalogue.vercel.app/api/admin/update/status",
+        { id, status },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to update status");
+    }
+  }
+);
+
 export const deleteProduct = createAsyncThunk(
   "productList/deleteProduct",
   async (id, { rejectWithValue }) => {
@@ -178,6 +201,23 @@ const productListSlice = createSlice({
       })
       .addCase(deleteProduct.rejected, (state, action) => {
         state.deleteStatus = "failed";
+        state.error = action.payload;
+      })
+      .addCase(updateStatus.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(updateStatus.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        const index = state.products.findIndex(
+          (product) => product._id === action.payload._id
+        );
+        if (index !== -1) {
+          state.products[index] = action.payload;
+        }
+        state.filteredProducts = filterProducts(state);
+      })
+      .addCase(updateStatus.rejected, (state, action) => {
+        state.status = "failed";
         state.error = action.payload;
       });
   },

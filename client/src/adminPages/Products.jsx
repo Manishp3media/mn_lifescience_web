@@ -15,6 +15,7 @@ import EditProduct from "@/adminComponents/EditProduct";
 import ActionDropdown from "@/adminComponents/ActionDropdown";
 import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
+import UpdateProductStatus from "@/adminComponents/UpdateProductStatus";
 
 const Products = () => {
     const dispatch = useDispatch();
@@ -130,6 +131,10 @@ const Products = () => {
                     setOpenEditModal(false);
                     setSelectedProduct(null);
                 }}  />
+
+
+            {/* Update Stauts Modal */}
+            <UpdateProductStatus id={selectedProduct?._id} newStatus={selectedProduct?.status} />
         </div>
     );
 };
