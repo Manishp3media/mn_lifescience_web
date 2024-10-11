@@ -28,6 +28,6 @@ router.delete("/admin/delete/product",authMiddleware('admin'), deleteProduct);
 router.patch("/admin/edit/product",authMiddleware('admin'), uploadProductImage, editProduct);
 
 // Update Product Status
-router.put('/api/products/update-status', updateProductStatus);
+router.patch('/admin/update/status', updateProductStatus);
 
 export default router;
