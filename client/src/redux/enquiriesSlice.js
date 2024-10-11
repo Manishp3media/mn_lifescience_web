@@ -37,6 +37,7 @@ const enquiryListSlice = createSlice({
     dateRange: initialDateRange,
     selectedUser: null,
     selectedCity: null,
+    selectedStatus: null,
     status: "idle",
     error: null,
   },
@@ -55,6 +56,10 @@ const enquiryListSlice = createSlice({
     },
     setSelectedCity: (state, action) => {
       state.selectedCity = action.payload;
+      state.filteredEnquiries = filteredEnquiries(state);
+    },
+    setSelectedStatus: (state, action) => {
+      state.selectedStatus = action.payload;
       state.filteredEnquiries = filteredEnquiries(state);
     },
     setfilteredEnquiries: (state, action) => {
@@ -80,8 +85,8 @@ const enquiryListSlice = createSlice({
 
 // Helper function to filter enquiries by date range, category, and status
 const filteredEnquiries = (state) => {
-  return state.enquiries.filter((enquiry) => {
-    const enquiryDate = moment(enquiry.createdAt);
+  return state.enquiries?.filter((enquiry) => {
+    const enquiryDate = moment(enquiry?.createdAt);
     const startDate = state.dateRange.startDate
       ? moment(state.dateRange.startDate)
       : null;
@@ -94,13 +99,17 @@ const filteredEnquiries = (state) => {
       : true;
 
     const matchesCity = state.selectedCity
-      ? enquiry.city === state.selectedCity
+      ? enquiry?.city === state.selectedCity
       : true;
     const matchesUser = state.selectedUser
-      ? enquiry.user === state.selectedUser
+      ? enquiry?.user === state.selectedUser
       : true;
 
-    return isInDateRange && matchesCity && matchesUser;
+    const matchesStatus = state.selectedStatus
+      ? enquiry?.status === state.selectedStatus
+      : true;
+
+    return isInDateRange && matchesCity && matchesUser && matchesStatus;
   });
 };
 
@@ -110,6 +119,7 @@ export const {
   setSelectedUser,
   setSelectedCity,
   setClearRange,
+  setSelectedStatus,
   setfilteredEnquiries,
 } = enquiryListSlice.actions;
 
