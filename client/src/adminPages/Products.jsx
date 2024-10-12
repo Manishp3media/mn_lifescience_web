@@ -67,11 +67,6 @@ const Products = () => {
         }
     };
 
-    const handleUpdateStatusClick = (product) => {
-        setOpenStatusProductId(product._id === openStatusProductId ? null : product._id); // Toggle the dropdown for the product
-    };
-
-
     // if (status === 'loading') {
     //     return <div>Loading...</div>;
     // }
@@ -79,13 +74,16 @@ const Products = () => {
     return (
         <div >
             <AdminNavbar title="Products" onSearch={handleSearch} />
-
-            <Table className="mt-4">
+            <div className="p-4">
+            <Table>
                 <TableHeader>
                     <TableRow>
+                        <TableHead>Image</TableHead>
                         <TableHead>Name</TableHead>
+                        <TableHead>Category</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>SKU</TableHead>
+                        <TableHead>Use</TableHead>
                         <TableHead>Description</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
@@ -94,8 +92,7 @@ const Products = () => {
                     {filteredAndSearchedProducts.map((product) => (
                         <TableRow key={product?._id}>
                             <TableCell>
-                                <div className="flex items-center ml-1">
-                                    {product?.productImage ? (
+                            {product?.productImage ? (
                                         <img
                                             src={product?.productImage}
                                             alt={product?.name}
@@ -107,23 +104,24 @@ const Products = () => {
                                         </div>
 
                                     )}
-                                    <div className="flex flex-col">
-                                        <div className="font-medium">{product?.name}</div>
-                                        <div className="text-sm text-gray-500">{product?.category.name}</div>
-                                    </div>
-                                </div>
                             </TableCell>
+                            <TableCell>
+                                {product?.name}
+                            </TableCell>
+
+                            <TableCell>{product?.category?.name}</TableCell>
 
                              {/* Clicking on status to open dropdown */}
                              <TableCell>
                              <UpdateProductStatus
                                     productId={product._id}
                                     currentStatus={product.status}
-                                    onStatusChange={(newStatus) => handleStatusChange(product._id, newStatus)}
+                                    
                                 />
                             </TableCell>
 
                             <TableCell>{product?.sku}</TableCell>
+                            <TableCell>{product?.use}</TableCell>
                             <TableCell>{product?.description}</TableCell>
                             <TableCell>
                                 {laodingProductId === product?._id ? (
@@ -140,21 +138,13 @@ const Products = () => {
                     ))}
                 </TableBody>
             </Table>
+            </div>
 
             {/* Edit Product Modal */}
             <EditProduct isOpen={openEditModal} product={selectedProduct} onClose={() => {
                 setOpenEditModal(false);
                 setSelectedProduct(null);
             }} />
-
-
-            {/* Update Stauts Modal */}
-            <UpdateProductStatus
-               
-                id={selectedProduct?._id}
-                currentStatus={selectedProduct?.status} // Pass the current status
-            />
-
         </div>
     );
 };

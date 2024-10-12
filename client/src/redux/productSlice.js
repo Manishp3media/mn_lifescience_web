@@ -208,11 +208,12 @@ const productListSlice = createSlice({
       })
       .addCase(updateStatus.fulfilled, (state, action) => {
         state.status = "succeeded";
+        const updatedProduct = action.payload.product;
         const index = state.products.findIndex(
-          (product) => product._id === action.payload._id
+          (product) => product._id === updatedProduct._id
         );
         if (index !== -1) {
-          state.products[index] = action.payload;
+          state.products[index].status = updatedProduct.status;
         }
         state.filteredProducts = filterProducts(state);
       })

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import moment from "moment";
 import EnquiriesNavbar from "@/adminComponents/EnquiriesNavbar";
+import EnquiryStatusDropdown from "@/adminComponents/EnquiryStatusDropdown";
 
 const Enquiries = () => {
     const dispatch = useDispatch();
@@ -34,7 +35,7 @@ const Enquiries = () => {
             const startDate = dateRange.startDate ? moment(dateRange.startDate).startOf('day') : null;
             const endDate = dateRange.endDate ? moment(dateRange.endDate).startOf('day') : null;
 
-            const isInDateRange = !startDate || !endDate || 
+            const isInDateRange = !startDate || !endDate ||
                 (enquiryDate.isSameOrAfter(startDate) && enquiryDate.isSameOrBefore(endDate));
 
 
@@ -61,29 +62,28 @@ const Enquiries = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead>Date</TableHead>
                             <TableHead>User Name</TableHead>
                             <TableHead>Mobile Number</TableHead>
-                            <TableHead>City</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Created At</TableHead>
                             <TableHead>Products</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Clinic Name</TableHead>
+                            <TableHead>City</TableHead>
+                            <TableHead>Speciality</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {filteredEnquiries.map((enquiry) => (
                             <TableRow key={enquiry._id}>
-                                <TableCell>{enquiry?.user?.name}</TableCell>
-                                <TableCell>{enquiry?.user?.mobileNumber}</TableCell>
-                                <TableCell>{enquiry?.user?.city}</TableCell>
-                                <TableCell>{enquiry?.price}</TableCell>
-                                <TableCell>{enquiry?.status}</TableCell>
-
                                 <TableCell>
                                     {enquiry?.createdAt ? moment(enquiry?.createdAt).format('D MMM YYYY') : ''}
                                     <br />
+                                    <span className="mt-2 inline-block">
                                     {enquiry?.createdAt ? moment(enquiry?.createdAt).format('hh:mm A') : ''}
+                                    </span>
                                 </TableCell>
+                                <TableCell>{enquiry?.user?.name}</TableCell>
+                                <TableCell>{enquiry?.user?.mobileNumber}</TableCell>
                                 <TableCell>
                                     {enquiry.productDetails.map((product, index) => (
                                         <span key={index}>
@@ -92,6 +92,12 @@ const Enquiries = () => {
                                         </span>
                                     ))}
                                 </TableCell>
+                                <TableCell>
+                                    <EnquiryStatusDropdown enquiryId={enquiry?._id} currentStatus={enquiry?.status} />
+                                </TableCell>
+                                <TableCell>{enquiry?.user?.clinicName}</TableCell>
+                                <TableCell>{enquiry?.user?.city}</TableCell>
+                                <TableCell>{enquiry?.user?.speciality}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

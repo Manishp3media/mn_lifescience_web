@@ -32,12 +32,15 @@ const Users = () => {
     return (
         <div>
             <AdminNavbar title="Users" />
+            <div className="p-4">
             <Table >
                 <TableHeader>
                     <TableRow>
                         <TableHead>Date</TableHead>
                         <TableHead>Name</TableHead>
+                        <TableHead>Clinic Name</TableHead>
                         <TableHead>Mobile Number</TableHead>
+                        <TableHead>Speciality</TableHead>
                         <TableHead>City</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -50,12 +53,16 @@ const Users = () => {
                                
                             </TableCell>
                             <TableCell>{user?.name}</TableCell>
+                            <TableCell>{user?.clinicName}</TableCell>
                             <TableCell>{user?.mobileNumber}</TableCell>
+                            <TableCell>{user?.speciality}</TableCell>
                             <TableCell>{user?.city}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
+            </div>
+            
         </div>
     );
 };

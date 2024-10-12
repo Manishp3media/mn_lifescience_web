@@ -18,7 +18,7 @@ const Categories = () => {
     return (
         <div>
             <CategoryNavbar />
-
+            <div className="p-4">
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -35,6 +35,7 @@ const Categories = () => {
                     ))}
                 </TableBody>
             </Table>
+            </div>
         </div>
     )
 }

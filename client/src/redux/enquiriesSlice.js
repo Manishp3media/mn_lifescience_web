@@ -23,6 +23,28 @@ export const fetchEnquiries = createAsyncThunk(
   }
 );
 
+
+export const updateEnquiryStatus = createAsyncThunk(
+  'enquiryList/updateEnquiryStatus',
+  async ({ id, status }, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.patch(
+        'https://mn-life-catalogue.vercel.app/api/admin/update/enquiry/status',
+        { id, status },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data; // Assuming the API returns the updated enquiry
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to update enquiry status');
+    }
+  }
+);
+
 // Initial date range
 const initialDateRange = {
   startDate: null,
@@ -80,6 +102,23 @@ const enquiryListSlice = createSlice({
         state.status = "failed";
         state.error = action.payload;
       })
+      .addCase(updateEnquiryStatus.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(updateEnquiryStatus.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+
+        // Update the enquiry status in the local state
+        const updatedEnquiry = action.payload.updatedEnquiry;
+        const index = state.enquiries.findIndex((enquiry) => enquiry._id === updatedEnquiry._id);
+        if (index !== -1) {
+          state.enquiries[index].status = updatedEnquiry.status;
+        }
+      })
+      .addCase(updateEnquiryStatus.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      });
   },
 });
 

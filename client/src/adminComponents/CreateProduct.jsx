@@ -35,6 +35,7 @@ const CreateProduct = ({ isOpen, onClose }) => {
             description: Yup.string().required("Description is required"),
             composition: Yup.string().required("Composition is required"),
             sku: Yup.string().required("SKU is required"),
+            use: Yup.string().required("Use is required"),
             category: Yup.string().required("Please select a category"),
             productImage: Yup.mixed().required("Product image is required"),
         }),
@@ -75,7 +76,12 @@ const CreateProduct = ({ isOpen, onClose }) => {
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen}   onOpenChange={(open) => {
+            if (!open) {
+              formik.resetForm(); 
+              onClose();
+            }
+          }}>
             <DialogContent className="text-color-[#386D62]">
                 <DialogHeader>
                     <DialogTitle>Create New Product</DialogTitle>
@@ -162,7 +168,20 @@ const CreateProduct = ({ isOpen, onClose }) => {
                             <div className="text-red-500">{formik.errors.sku}</div>
                         )}
                     </div>
-
+                    <div>
+                        <label className="block">Use</label>
+                        <Input
+                            name="use"
+                            value={formik.values.use}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            placeholder="Enter product use"
+                            required
+                        />
+                        {formik.touched.use && formik.errors.use && (
+                            <div className="text-red-500">{formik.errors.use}</div>
+                        )}
+                    </div>
                     <div>
                         <label className="block">Product Image</label>
                         <Input
@@ -181,7 +200,10 @@ const CreateProduct = ({ isOpen, onClose }) => {
                         <Button type="submit" className="bg-[#386D62] hover:bg-[#386D62]" disabled={isCreating}>
                             {isCreating ? <CustomSpinner size={20} /> : "Create"}
                         </Button>
-                        <Button className="hover:bg-red-500" onClick={onClose}>
+                        <Button className="hover:bg-red-500" onClick={() => {
+            formik.resetForm(); // Reset the form on cancel
+            onClose();
+          }}>
                             Cancel
                         </Button>
                     </DialogFooter>

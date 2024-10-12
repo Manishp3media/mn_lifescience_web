@@ -4,7 +4,7 @@ import Product from "../models/Product.js";
 // Create an enquiry
 export const createEnquiry = async (req, res) => {
     try {
-        const { productIds, price } = req.body; // Assuming products are sent as an array of product IDs
+        const { productIds } = req.body; // Assuming products are sent as an array of product IDs
         const id = req.user.id; // Assuming you're using JWT to identify the user
 
         // Validate that the products exist
@@ -17,7 +17,6 @@ export const createEnquiry = async (req, res) => {
         const newEnquiry = new Enquiry({
             user: id, // Link the user making the enquiry
             products: productIds, // Array of products the user is enquiring about
-            price: price,
             status: "yet to contact" // Default status
         });
 
@@ -67,7 +66,6 @@ export const getEnquiries = async (req, res) => {
                     'user.name': 1,
                     'user.mobileNumber': 1,
                     'user.city': 1,
-                    price: 1,
                     status: 1,
                     productDetails: {
                         $map: {

@@ -12,10 +12,10 @@ const enquirySchema = new mongoose.Schema({
         ref: 'Product', // Reference to the Product model
         required: true,
     }],
-    price: {
-        type: String,
-        required: true,
-    },
+    // price: {
+    //     type: String,
+    //     required: true,
+    // },
     status: {
         type: String,
         enum: ["yet to contact", "DND", "confirming order", "order confirmed"],

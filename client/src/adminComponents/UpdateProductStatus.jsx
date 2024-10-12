@@ -10,17 +10,23 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useState } from "react";
 
-const UpdateProductStatus = ({ productId, currentStatus, onStatusChange }) => {
+const UpdateProductStatus = ({ productId, currentStatus }) => {
     const dispatch = useDispatch();
+    const [loading, setLoading] = useState(false);
 
     const handleUpdateStatus = async (newStatus) => {
         try {
+            setLoading(true);
             await dispatch(updateStatus({ id: productId, status: newStatus })).unwrap();
             toast.success('Status updated successfully');
-            onStatusChange(newStatus);
+           
         } catch (error) {
+            console.error('Error updating status:', error);
             toast.error('Failed to update status');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -28,7 +34,7 @@ const UpdateProductStatus = ({ productId, currentStatus, onStatusChange }) => {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="outline">
-                    {currentStatus}
+                    {loading ? <Loader2 className="animate-spin h-4 w-4" /> : currentStatus}
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
