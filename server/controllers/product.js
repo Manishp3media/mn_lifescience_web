@@ -138,7 +138,7 @@ export const updateProductStatus = async (req, res) => {
         const { id, status } = req.body;
 
         // Validate the status input
-        if (!["avaiable", "out of stock"].includes(status)) {
+        if (!["available", "out of stock"].includes(status)) {
             return res.status(400).json({  message: "Invalid status value. Must be either 'avaiable' or 'out of stock'." });
         }
 

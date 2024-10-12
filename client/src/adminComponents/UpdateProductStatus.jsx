@@ -1,39 +1,43 @@
+import React from 'react';
+import { useDispatch } from 'react-redux';
+import { updateStatus } from '@/redux/productSlice';
+import { toast } from 'react-toastify';
+import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
-  } from "@/components/ui/dropdown-menu"
-import { updateStatus } from "@/redux/productSlice";
-import { useDispatch } from "react-redux";
-import { toast } from "react-toastify";
+} from '@/components/ui/dropdown-menu';
 
-const UpdateProductStatus = ({ id, newStatus }) => {
+const UpdateProductStatus = ({ productId, currentStatus, onStatusChange }) => {
     const dispatch = useDispatch();
-    const [loading, setLoading] = useState(false);
 
-    const handleUpdateStatus = (status) => {
-        setLoading(true);
+    const handleUpdateStatus = async (newStatus) => {
         try {
-            dispatch(updateStatus({id, status: newStatus}));
-        toast.success("Status updated successfully");
+            await dispatch(updateStatus({ id: productId, status: newStatus })).unwrap();
+            toast.success('Status updated successfully');
+            onStatusChange(newStatus);
         } catch (error) {
-            toast.error("Failed to update status");
-        } finally {
-            setLoading(false);
+            toast.error('Failed to update status');
         }
-        
-    }
+    };
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                    {currentStatus}
+                </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleUpdateStatus("avaiable")}>Avaiable</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleUpdateStatus("out of stock")}>Out of stock</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleUpdateStatus('available')}>
+                    Available
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleUpdateStatus('out of stock')}>
+                    Out of Stock
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );

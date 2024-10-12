@@ -29,6 +29,7 @@ const Products = () => {
     const [openEditModal, setOpenEditModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [laodingProductId, setLoadingProductId] = useState(null);
+    const [openStatusProductId, setOpenStatusProductId] = useState(null);
 
     const handleSearch = (searchTerm) => {
         setSearchTerm(searchTerm);
@@ -49,13 +50,13 @@ const Products = () => {
     };
 
     const handleDeleteClick = async (id) => {
-        
+
         setLoadingProductId(id);
-        
+
         try {
-           
+
             const result = await dispatch(deleteProduct(id)).unwrap();
-           
+
             toast.success("Product deleted successfully");
         } catch (error) {
 
@@ -65,6 +66,11 @@ const Products = () => {
             setLoadingProductId(null);
         }
     };
+
+    const handleUpdateStatusClick = (product) => {
+        setOpenStatusProductId(product._id === openStatusProductId ? null : product._id); // Toggle the dropdown for the product
+    };
+
 
     // if (status === 'loading') {
     //     return <div>Loading...</div>;
@@ -107,7 +113,16 @@ const Products = () => {
                                     </div>
                                 </div>
                             </TableCell>
-                            <TableCell>{product?.status}</TableCell>
+
+                             {/* Clicking on status to open dropdown */}
+                             <TableCell>
+                             <UpdateProductStatus
+                                    productId={product._id}
+                                    currentStatus={product.status}
+                                    onStatusChange={(newStatus) => handleStatusChange(product._id, newStatus)}
+                                />
+                            </TableCell>
+
                             <TableCell>{product?.sku}</TableCell>
                             <TableCell>{product?.description}</TableCell>
                             <TableCell>
@@ -128,13 +143,18 @@ const Products = () => {
 
             {/* Edit Product Modal */}
             <EditProduct isOpen={openEditModal} product={selectedProduct} onClose={() => {
-                    setOpenEditModal(false);
-                    setSelectedProduct(null);
-                }}  />
+                setOpenEditModal(false);
+                setSelectedProduct(null);
+            }} />
 
 
             {/* Update Stauts Modal */}
-            <UpdateProductStatus id={selectedProduct?._id} newStatus={selectedProduct?.status} />
+            <UpdateProductStatus
+               
+                id={selectedProduct?._id}
+                currentStatus={selectedProduct?.status} // Pass the current status
+            />
+
         </div>
     );
 };
