@@ -20,9 +20,12 @@ export const addSocialMediaLink = createAsyncThunk(
       } catch (error) {
         console.log(error);
         return rejectWithValue(error.response?.data?.message || "Failed to create product");
+        console.log(error.response.data.message)
       }
     }
   );
+
+  
 
 
 const socialMediaLinkSlice = createSlice({

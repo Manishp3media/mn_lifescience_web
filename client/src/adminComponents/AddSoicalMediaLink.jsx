@@ -12,44 +12,40 @@ import { addSocialMediaLink } from "@/redux/socialMediaSlice";
 function AddSocialMediaLink({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) {
     const dispatch = useDispatch();
     const [isCreating, setIsCreating] = useState(false);
-  const formik = useFormik({
-    initialValues: {
-      platform: '',
-      url: '',
-    },
-    validationSchema: Yup.object({
-      platform: Yup.string().required('Platform is required'),
-      url: Yup.string().required('URL is required'),
-    }),
-    onSubmit: async (values) => {
-        setIsCreating(true);
-        try {
-          // Await the dispatch to ensure it resolves
-          const result = await dispatch(addSocialMediaLink(values));
-      
-          if (addSocialMediaLink.fulfilled.match(result)) {
-            toast.success('Social media link added successfully!');
-            onSocialMediaLinkClose();  // Close modal only on success
-          } else if (addSocialMediaLink.rejected.match(result)) {
-            throw new Error(result.payload || 'Failed to add social media link');
-          }
-        } catch (error) {
-          console.error('Error adding social media link:', error);
-          // Check if the error is specific to the platform field
-          if (error.response && error.response.status === 400 && error.response.data.message.includes('Social media link for platform already exists')) {
-            formik.setFieldError("platform", "Social media link for this platform already exists");
-          } else {
-            toast.error("Failed to add social media link");
-          }
-        } finally {
-          setIsCreating(false);
-        }
-      }
-      
-  });
+    const formik = useFormik({
+        initialValues: {
+            platform: '',
+            url: '',
+        },
+        validationSchema: Yup.object({
+            platform: Yup.string().required('Platform is required'),
+            url: Yup.string().required('URL is required'),
+        }),
+        onSubmit: async (values) => {
+            setIsCreating(true);
+            try {
+                await dispatch(addSocialMediaLink(values)).unwrap();
+                toast.success("Product created successfully");
+                formik.resetForm();
+            } catch (error) {
+                // The error message is now directly in the error object
+                const errorMessage = error || 'Failed to add social media link';
 
-  return (
-    <Dialog open={isSocialMediaLinkOpen} onOpenChange={onSocialMediaLinkClose}>
+                if (errorMessage === "Social media link for platform already exists") {
+                    toast.error("Social media link for platform already exists");
+                } else {
+                    toast.error(errorMessage);
+                }
+            } finally {
+                setIsCreating(false);
+                onSocialMediaLinkClose();
+            }
+        }
+
+    });
+
+    return (
+        <Dialog open={isSocialMediaLinkOpen} onOpenChange={onSocialMediaLinkClose}>
             <DialogContent className="text-color-[#386D62]">
                 <DialogHeader>
                     <DialogTitle>Add New Social Media Link</DialogTitle>
@@ -98,7 +94,7 @@ function AddSocialMediaLink({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) {
                 </form>
             </DialogContent>
         </Dialog>
-  );
+    );
 }
 
 export default AddSocialMediaLink;
