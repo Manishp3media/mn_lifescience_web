@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import CreateProduct from "./CreateProduct";
 import { fetchProducts, setSelectedCategory, setSelectedStatus } from '@/redux/productSlice';
+import ProductBulkUploadDialog from "./ProducBulkUpload";
 
 const AdminNavbar = ({ title, onSearch }) => {
     const dispatch = useDispatch();
     const [isModalOpen, setModalOpen] = useState(false);
+    const [isBulkUploadModalOpen, setBulkUploadModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const { products, selectedCategory, selectedStatus } = useSelector(state => state.productList || {});
 
@@ -27,6 +29,9 @@ const AdminNavbar = ({ title, onSearch }) => {
 
     const handleOpenModal = () => setModalOpen(true);
     const handleCloseModal = () => setModalOpen(false);
+
+    const handleOpenBulkUploadModal = () => setBulkUploadModalOpen(true);
+    const handleCloseBulkUploadModal = () => setBulkUploadModalOpen(false);
 
     const handleSearch = (event) => {
         setSearchTerm(event.target.value);
@@ -118,6 +123,13 @@ const AdminNavbar = ({ title, onSearch }) => {
                             <Plus className="mr-2 h-5 w-5" />
                             Add Product
                         </Button>
+                        <Button
+                            className="bg-green-500 hover:bg-green-600 text-white"
+                            onClick={handleOpenBulkUploadModal}
+                        >
+                            <Plus className="mr-2 h-5 w-5" />
+                            Bulk Upload
+                        </Button>
                     </div>
                 </div>
                 <div className="flex items-center space-x-2 py-2">
@@ -140,6 +152,7 @@ const AdminNavbar = ({ title, onSearch }) => {
                 </div>
             </div>
             {isModalOpen && <CreateProduct isOpen={isModalOpen} onClose={handleCloseModal} />}
+            {isBulkUploadModalOpen && <ProductBulkUploadDialog isBulkOpen={isBulkUploadModalOpen} onBulkClose={handleCloseBulkUploadModal} />}
         </nav>
     );
 };

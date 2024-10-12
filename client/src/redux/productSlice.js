@@ -119,6 +119,34 @@ export const deleteProduct = createAsyncThunk(
   }
 );
 
+// Bulk Upload Products via Excel
+export const bulkUploadProducts = createAsyncThunk(
+  "productList/bulkUploadProducts",
+  async (fileData, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("excelFile", fileData); // Make sure this matches the expected field name
+
+      const response = await axios.post(
+        "http://localhost:5000/api/admin/products/bulk/upload",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      
+      return response.data; // Assuming the response contains uploaded products data
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to upload products via Excel"
+      );
+    }
+  }
+);
 
 const productListSlice = createSlice({
   name: "productList",
@@ -130,6 +158,7 @@ const productListSlice = createSlice({
     status: "idle",
     error: null,
     deleteStatus: "idle",
+    bulkUploadStatus: "idle",
   },
   reducers: {
     setSelectedCategory: (state, action) => {
@@ -219,6 +248,19 @@ const productListSlice = createSlice({
       })
       .addCase(updateStatus.rejected, (state, action) => {
         state.status = "failed";
+        state.error = action.payload;
+      })
+      // Bulk Upload Products via Excel
+      .addCase(bulkUploadProducts.pending, (state) => {
+        state.bulkUploadStatus = "loading";
+      })
+      .addCase(bulkUploadProducts.fulfilled, (state, action) => {
+        state.bulkUploadStatus = "succeeded";
+        state.products = [...state.products, ...action.payload.products]; // Merge new products into the list
+        state.filteredProducts = filterProducts(state); // Reapply filtering
+      })
+      .addCase(bulkUploadProducts.rejected, (state, action) => {
+        state.bulkUploadStatus = "failed";
         state.error = action.payload;
       });
   },
