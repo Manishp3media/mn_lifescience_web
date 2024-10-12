@@ -7,15 +7,6 @@ const socialMediaLinkSchema = new mongoose.Schema({
     url: {
         type: String,
     },
-    adminEmail: {
-        type: String,
-    },
-    adminMobileNumber: {
-        type: String,
-    },
-    whatsappNumber: {
-        type: String,
-    },
 }, {
     timestamps: true,
 });
