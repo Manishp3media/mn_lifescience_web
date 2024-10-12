@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
 export const addSocialMediaLink = createAsyncThunk(
     "socialMediaLink/addSoicalMediaLink",
@@ -11,12 +12,13 @@ export const addSocialMediaLink = createAsyncThunk(
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
+              "Content-Type": "application/json",
             },
           }
         );
         return response.data.newLink;
       } catch (error) {
+        console.log(error);
         return rejectWithValue(error.response?.data?.message || "Failed to create product");
       }
     }
@@ -39,7 +41,7 @@ const socialMediaLinkSlice = createSlice({
             })
             .addCase(addSocialMediaLink.rejected, (state, action) => {
                 state.loading = false;
-
+                state.error = action.payload;
             });
     },
 });

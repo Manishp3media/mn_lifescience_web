@@ -14,7 +14,7 @@ export const addSocialMediaLink = async (req, res) => {
         // Check if a social media link with the same platform already exists
         const existingLink = await SocialMediaLink.findOne({ platform: platform.toLowerCase() });
         if (existingLink) {
-            return res.status(400).json({ message: `Social media link for platform '${platform}' already exists` });
+            return res.status(400).json({ message: "Social media link for platform already exists" });
         }
 
         // Create a new social media link object

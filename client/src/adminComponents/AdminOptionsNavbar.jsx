@@ -2,10 +2,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus} from "lucide-react";
 import AddBanner from "./AddBanner";
-
+import AddSocialMediaLink from "./AddSoicalMediaLink";
 
 const AdminOptionsNavbar = () => {
     const [isBannerModalOpen, setBannerModalOpen] = useState(false);
+    const [isOpenSocialModal, setOpenSocialModal] = useState(false);
+
+    const handleOpenSocialModal = () => {
+        setOpenSocialModal(true);
+    };
 
       const handleOpenBannerModal = () => {
         console.log("Opening Add Banner modal");
@@ -40,7 +45,7 @@ const AdminOptionsNavbar = () => {
                         </Button>
                         <Button
                             className="bg-green-500 hover:bg-green-600 text-white"
-                            
+                            onClick={handleOpenSocialModal}
                         >
                             <Plus className="mr-2 h-5 w-5" />
                             Add Social Media Links
@@ -54,6 +59,14 @@ const AdminOptionsNavbar = () => {
          {/* AddBanner modal */}
          {isBannerModalOpen && (
             <AddBanner isOpen={isBannerModalOpen} onClose={handleCloseBannerModal} />
+        )}
+
+        {/* AddSocialMediaLink modal */}
+        {isOpenSocialModal && (
+            <AddSocialMediaLink
+                isSocialMediaLinkOpen={isOpenSocialModal}
+                onSocialMediaLinkClose={() => setOpenSocialModal(false)}
+            />
         )}
         </div>
     );

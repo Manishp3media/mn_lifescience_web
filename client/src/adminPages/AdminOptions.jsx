@@ -12,6 +12,7 @@ const AdminOptions = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [deleting, setDeleting] = useState(false);
 
+
     useEffect(() => {
         dispatch(getAllBanners());
     }, [dispatch]);
@@ -24,7 +25,6 @@ const AdminOptions = () => {
             }
         });
         setDeleting(false);
-
     }
 
     return (
