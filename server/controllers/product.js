@@ -3,6 +3,8 @@ import { z } from "zod";
 import Product from "../models/Product.js";
 import Category from "../models/Category.js";
 import mongoose from 'mongoose';
+import XLSX from "xlsx";
+
 
 // Create Product
 export const createProduct = async (req, res) => {
@@ -55,6 +57,68 @@ export const createProduct = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+
+// Controller for handling bulk product uploads via Excel
+export const bulkUploadProducts = async (req, res) => {
+    try {
+        // Check if file exists
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        // Parse the Excel file from buffer (since it's stored in memory)
+        const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+        const products = [];
+        for (const row of sheet) {
+            try {
+                // Validate each row using Zod schema
+                createProductSchema.parse(row);
+
+                const { name, description, category: categoryName, composition, use, sku } = row;
+
+                // Check if SKU already exists
+                const existingProduct = await Product.findOne({ sku });
+                if (existingProduct) {
+                    console.warn(`SKU ${sku} already exists, skipping...`);
+                    continue;
+                }
+
+                // Find the category by name
+                const category = await Category.findOne({ name: categoryName.toLowerCase() });
+                if (!category) {
+                    console.warn(`Category ${categoryName} not found, skipping...`);
+                    continue;
+                }
+
+                // Create product object
+                const product = new Product({
+                    name,
+                    description,
+                    category: category._id,
+                    composition,
+                    use,
+                    sku,
+                });
+
+                // Save product to database
+                await product.save();
+                products.push(product);  // Add saved product to the response array
+            } catch (err) {
+                console.error(`Error processing product with SKU ${row.sku}:`, err.message);
+                continue;  // Skip invalid product row
+            }
+        }
+
+        res.status(201).json({ message: "Bulk upload completed", products });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+};
 
 export const getAllProducts = async (req, res) => {
     try {

@@ -1,7 +1,7 @@
 import express from "express";
-import { createProduct, getAllProducts, getProductsByCategory, getProductById, updateProductStatus } from "../controllers/product.js";
+import { createProduct, getAllProducts, getProductsByCategory, getProductById, updateProductStatus, bulkUploadProducts } from "../controllers/product.js";
 import authMiddleware from "../middleware/auth.js";
-import { uploadProductImage } from "../middleware/uploadDocuments.js";
+import { uploadProductImage, uploadExcelFile } from "../middleware/uploadDocuments.js";
 import { deleteProduct, editProduct } from "../utils/cloudinary.js";
 
 const router = express.Router();
@@ -29,5 +29,8 @@ router.patch("/admin/edit/product",authMiddleware('admin'), uploadProductImage, 
 
 // Update Product Status
 router.patch('/admin/update/status', updateProductStatus);
+
+/// Bulk upload route (Excel file handling)
+router.post("/admin/products/bulk/upload", authMiddleware('admin'), uploadExcelFile, bulkUploadProducts);
 
 export default router;
