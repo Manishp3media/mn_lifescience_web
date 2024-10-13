@@ -3,24 +3,29 @@ import { Button } from "@/components/ui/button";
 import { Plus} from "lucide-react";
 import AddBanner from "./AddBanner";
 import AddSocialMediaLink from "./AddSoicalMediaLink";
+import AddLogo from "./AddLogo";
 
 const AdminOptionsNavbar = () => {
     const [isBannerModalOpen, setBannerModalOpen] = useState(false);
     const [isOpenSocialModal, setOpenSocialModal] = useState(false);
+    const [isOpenLogoModal, setOpenLogoModal] = useState(false);
 
     const handleOpenSocialModal = () => {
         setOpenSocialModal(true);
     };
 
       const handleOpenBannerModal = () => {
-        console.log("Opening Add Banner modal");
         setBannerModalOpen(true);
     };
 
     const handleCloseBannerModal = () => {
-        console.log("Closing Add Banner modal");
         setBannerModalOpen(false);
     };
+
+    const handleLogoModal = () => {
+        setOpenLogoModal(true);
+    };
+
     return (
         <div>
         <nav className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg">
@@ -36,6 +41,7 @@ const AdminOptionsNavbar = () => {
                         </div>
                     </div>
                     <div className="flex items-center space-x-4">
+                        {/* AddBanner modal */}
                         <Button
                             className="bg-green-500 hover:bg-green-600 text-white"
                             onClick={handleOpenBannerModal}
@@ -43,6 +49,17 @@ const AdminOptionsNavbar = () => {
                             <Plus className="mr-2 h-5 w-5" />
                             Add Banner
                         </Button>
+
+                        {/* AddLogo modal */}
+                        <Button
+                            className="bg-green-500 hover:bg-green-600 text-white"
+                            onClick={handleLogoModal}
+                        >
+                            <Plus className="mr-2 h-5 w-5" />
+                            Add Logo
+                        </Button>
+
+                        {/* AddSocialMediaLink modal */}
                         <Button
                             className="bg-green-500 hover:bg-green-600 text-white"
                             onClick={handleOpenSocialModal}
@@ -68,6 +85,9 @@ const AdminOptionsNavbar = () => {
                 onSocialMediaLinkClose={() => setOpenSocialModal(false)}
             />
         )}
+
+        {/* AddLogo modal */}
+        <AddLogo isAddLogoOpen={isOpenLogoModal} onLogoClose={() => setOpenLogoModal(false)} />
         </div>
     );
 };

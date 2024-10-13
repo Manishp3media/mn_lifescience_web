@@ -32,7 +32,7 @@ function AddSocialMediaLink({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) {
                 const errorMessage = error || 'Failed to add social media link';
 
                 if (errorMessage === "Social media link for platform already exists") {
-                    toast.error("Social media link for platform already exists");
+                    toast.error("A social media link for this platform already exists.");
                 } else {
                     toast.error(errorMessage);
                 }
