@@ -76,3 +76,17 @@ export const editLogo = async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
+// Get Logo
+export const getLogo = async (req, res) => {
+    try {
+        const logo = await Logo.find();
+        if (!logo) {
+            return res.status(404).json({ message: "Logo not found" });
+        }
+        return res.status(200).json({ logo });
+    } catch (error) {
+        console.error("Error getting logo:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
