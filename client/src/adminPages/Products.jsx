@@ -16,6 +16,7 @@ import ActionDropdown from "@/adminComponents/ActionDropdown";
 import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import UpdateProductStatus from "@/adminComponents/UpdateProductStatus";
+import { Input } from "@/components/ui/input";
 
 const Products = () => {
     const dispatch = useDispatch();
@@ -67,10 +68,6 @@ const Products = () => {
         }
     };
 
-    // if (status === 'loading') {
-    //     return <div>Loading...</div>;
-    // }
-
     return (
         <div >
             <AdminNavbar title="Products" onSearch={handleSearch} />
@@ -85,6 +82,7 @@ const Products = () => {
                         <TableHead>SKU</TableHead>
                         <TableHead>Use</TableHead>
                         <TableHead>Description</TableHead>
+                        <TableHead>Tags</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -123,6 +121,10 @@ const Products = () => {
                             <TableCell>{product?.sku}</TableCell>
                             <TableCell>{product?.use}</TableCell>
                             <TableCell>{product?.description}</TableCell>
+                            <TableCell>
+                                {/* <Input className="w-[250px] h-[50px]" type="text" value={product?.tags} /> */}
+                                {product?.tags}
+                            </TableCell>
                             <TableCell>
                                 {laodingProductId === product?._id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />

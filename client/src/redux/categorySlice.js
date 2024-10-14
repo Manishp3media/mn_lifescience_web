@@ -31,7 +31,8 @@ export const fetchCategories = createAsyncThunk(
       
       try {
         const response = await axios.post(
-          "https://mn-life-catalogue.vercel.app/api/admin/create/category",
+          // "https://mn-life-catalogue.vercel.app/api/admin/create/category"
+          "http://localhost:5000/api/admin/create/category",
           categoryData,
           {
             headers: {

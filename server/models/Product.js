@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
 
+const productImageSchema = new mongoose.Schema({
+    _id: { type: mongoose.Schema.Types.ObjectId, auto: true },  // Auto-generating ObjectId
+    url: { type: String },     // Cloudinary image URL or file path
+});
+
 const productSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -25,9 +30,7 @@ const productSchema = new mongoose.Schema({
     tags: {
         type: [String],
     },
-    productImages: [{
-        type: String,  
-    }],
+    productImages: [productImageSchema],
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category', // Reference to the Category model

@@ -28,7 +28,10 @@ export const createProduct = async (req, res) => {
         // Check if image is provided
         let productImages = [];
         if (req.files && req.files["productImages"]) {
-            productImages = req.files["productImages"].map(file => file.path);
+            productImages = req.files["productImages"].map(file => ({
+                _id: new mongoose.Types.ObjectId(),  // Assign MongoDB ObjectId
+                url: file.path                       // Store file path or URL
+            }));
         }
            
         // Create new product
@@ -109,7 +112,7 @@ export const bulkUploadProducts = async (req, res) => {
                 await product.save();
                 products.push(product);  // Add saved product to the response array
             } catch (err) {
-                console.error(`Error processing product with SKU ${row.sku}:`, err.message);
+                console.error(err);
                 continue;  // Skip invalid product row
             }
         }
@@ -148,6 +151,7 @@ export const getAllProducts = async (req, res) => {
                     sku: 1,
                     status: 1,
                     productImages: 1,
+                    tags: 1,
                     createdAt: 1, // Ensure createdAt is included
                     category: {
                         _id: "$categoryDetails._id",
@@ -227,4 +231,41 @@ export const updateProductStatus = async (req, res) => {
     }
 };
 
-// 
+// Add more images to a product
+// Add more images to a product
+export const addProductImages = async (req, res) => {
+    try {
+        const { id } = req.body;
+
+        // Find the product in the database
+        const product = await Product.findById(id);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        // Check if new images are provided by the middleware
+        if (!req.files || !req.files["productImages"]) {
+            return res.status(400).json({ message: "No images uploaded" });
+        }
+
+        // Extract the URLs of the uploaded images and assign new IDs
+        const newImages = req.files["productImages"].map(file => ({
+            _id: new mongoose.Types.ObjectId(), // Assign MongoDB ObjectId for new images
+            url: file.path                       // Store the file path or URL
+        }));
+
+        // Add the new images to the productImages array
+        product.productImages = [...product.productImages, ...newImages];
+
+        // Save the updated product with the new images
+        await product.save();
+
+        res.status(200).json({
+            message: "Images added successfully",
+            productImages: product.productImages,
+        });
+    } catch (err) {
+        console.error(`Error adding images to product:`, err);
+        res.status(500).json({ error: err.message });
+    }
+};
