@@ -232,7 +232,6 @@ export const updateProductStatus = async (req, res) => {
 };
 
 // Add more images to a product
-// Add more images to a product
 export const addProductImages = async (req, res) => {
     try {
         const { id } = req.body;

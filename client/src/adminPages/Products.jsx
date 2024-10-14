@@ -10,13 +10,14 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { fetchProducts, deleteProduct } from '@/redux/productSlice';
+import { fetchProducts, deleteProduct, deleteProductImage } from '@/redux/productSlice';
 import EditProduct from "@/adminComponents/EditProduct";
 import ActionDropdown from "@/adminComponents/ActionDropdown";
 import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import UpdateProductStatus from "@/adminComponents/UpdateProductStatus";
 import { Input } from "@/components/ui/input";
+import ProductImagesPopup from "@/adminComponents/ProductImages";
 
 const Products = () => {
     const dispatch = useDispatch();
@@ -31,6 +32,8 @@ const Products = () => {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [laodingProductId, setLoadingProductId] = useState(null);
     const [openStatusProductId, setOpenStatusProductId] = useState(null);
+    const [openImageModal, setOpenImageModal] = useState(false); // State for image modal
+    const [currentProductImages, setCurrentProductImages] = useState([]);
 
     const handleSearch = (searchTerm) => {
         setSearchTerm(searchTerm);
@@ -51,11 +54,8 @@ const Products = () => {
     };
 
     const handleDeleteClick = async (id) => {
-
         setLoadingProductId(id);
-
         try {
-
             const result = await dispatch(deleteProduct(id)).unwrap();
 
             toast.success("Product deleted successfully");
@@ -65,6 +65,20 @@ const Products = () => {
         } finally {
             // Reset loading product ID after the operation
             setLoadingProductId(null);
+        }
+    };
+
+    // const handleViewImages = (images) => {
+    //     setCurrentProductImages(images); // Set current product images
+    //     setOpenImageModal(true); // Open the image modal
+    // };
+
+    const handleDeleteImage = async (id, imageId) => {
+        try {
+            await dispatch(deleteProductImage(id, imageId)).unwrap();
+            toast.success("Image deleted successfully");
+        } catch (error) {
+            toast.error(error?.message || "Failed to delete image");
         }
     };
 
@@ -90,19 +104,11 @@ const Products = () => {
                     {filteredAndSearchedProducts.map((product) => (
                         <TableRow key={product?._id}>
                             <TableCell>
-                            {product?.productImage ? (
-                                        <img
-                                            src={product?.productImage}
-                                            alt={product?.name}
-                                            className="object-fit w-[80px] h-[80px] mr-2"
-                                        />
-                                    ) : (
-                                        <div className="w-[80px] h-[80px] flex items-center justify-center mr-2">
-                                            <img src="/upload.jpg" />
-                                        </div>
-
-                                    )}
-                            </TableCell>
+                            <ProductImagesPopup 
+                                        images={product.productImages}
+                                        onDeleteImage={(imageId) => handleDeleteImage(product._id, imageId)}
+                                    />
+                                </TableCell>
                             <TableCell>
                                 {product?.name}
                             </TableCell>

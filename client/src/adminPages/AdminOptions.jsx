@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from "react-redux";
 import AdminOptionsNavbar from "@/adminComponents/AdminOptionsNavbar";
 import { getAllBanners, deleteBanner } from "@/redux/bannerSlice";
 import { Trash2 } from "lucide-react";
-import { set } from "date-fns";
 import CustomSpinner from "@/adminComponents/CustomSpinner";
 
 const AdminOptions = () => {

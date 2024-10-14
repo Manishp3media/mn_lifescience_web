@@ -34,7 +34,7 @@ router.patch('/admin/update/status', updateProductStatus);
 router.post("/admin/products/bulk/upload", authMiddleware('admin'), uploadExcelFile, bulkUploadProducts);
 
 // add images
-router.post("/admin/add/product/images",authMiddleware('admin'), uploadProductImage, addProductImages);
+router.patch("/admin/add/product/images",authMiddleware('admin'), uploadProductImage, addProductImages);
 
 // delete images
 router.delete("/admin/delete/product/images",authMiddleware('admin'), deleteProductImage);

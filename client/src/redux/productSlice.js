@@ -3,26 +3,26 @@ import axios from "axios";
 
 // Fetch all products
 export const fetchProducts = createAsyncThunk(
-    "productList/fetchProducts",
-    async (_, { rejectWithValue }) => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          "https://mn-life-catalogue.vercel.app/api/admin/get/products",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        
-        return response.data.products; 
-      } catch (error) {
-        return rejectWithValue(error.response?.data || "Failed to fetch products");
-      }
+  "productList/fetchProducts",
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        "https://mn-life-catalogue.vercel.app/api/admin/get/products",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      return response.data.products;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch products");
     }
-  );
-  
+  }
+);
+
 // Create a product
 export const createProduct = createAsyncThunk(
   "productList/createProduct",
@@ -72,7 +72,7 @@ export const updateProduct = createAsyncThunk(
 // Update Status
 export const updateStatus = createAsyncThunk(
   "productList/updateStatus",
-  async ({id, status}, { rejectWithValue }) => {
+  async ({ id, status }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.patch(
@@ -104,7 +104,7 @@ export const deleteProduct = createAsyncThunk(
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json", 
+            "Content-Type": "application/json",
           },
           data: { id },
         }
@@ -138,7 +138,7 @@ export const bulkUploadProducts = createAsyncThunk(
           },
         }
       );
-      
+
       return response.data; // Assuming the response contains uploaded products data
     } catch (error) {
       return rejectWithValue(
@@ -147,6 +147,29 @@ export const bulkUploadProducts = createAsyncThunk(
     }
   }
 );
+
+// Delete Images
+export const deleteProductImage = createAsyncThunk(
+  "productList/deleteProductImage",
+  async ({ id, imageId }, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.patch(
+        "https://mn-life-catalogue.vercel.app/api/admin/delete/product/images",
+        { id, imageId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to delete image");
+    }
+  }
+);
+
 
 const productListSlice = createSlice({
   name: "productList",
@@ -159,6 +182,7 @@ const productListSlice = createSlice({
     error: null,
     deleteStatus: "idle",
     bulkUploadStatus: "idle",
+    deleteImageStatus: "idle"
   },
   reducers: {
     setSelectedCategory: (state, action) => {
@@ -220,7 +244,7 @@ const productListSlice = createSlice({
         state.deleteStatus = "loading";
       })
       .addCase(deleteProduct.fulfilled, (state, action) => {
-          state.deleteStatus = "succeeded";
+        state.deleteStatus = "succeeded";
         state.products = state.products.filter(
           (product) => product._id !== action.payload
         );
@@ -262,26 +286,45 @@ const productListSlice = createSlice({
       .addCase(bulkUploadProducts.rejected, (state, action) => {
         state.bulkUploadStatus = "failed";
         state.error = action.payload;
+      })
+      // Delete Product Image
+      .addCase(deleteProductImage.pending, (state) => {
+        state.deleteImageStatus = "loading";
+      })
+      .addCase(deleteProductImage.fulfilled, (state, action) => {
+        state.deleteImageStatus = "succeeded";
+        const updatedProduct = action.payload.product;
+        const index = state.products.findIndex(
+          (product) => product._id === updatedProduct._id
+        );
+        if (index !== -1) {
+          state.products[index].image = updatedProduct.image;
+        }
+        state.filteredProducts = filterProducts(state);
+      })
+      .addCase(deleteProductImage.rejected, (state, action) => {
+        state.deleteImageStatus = "failed";
+        state.error = action.payload;
       });
   },
 });
 
 // Helper function to filter products by date range, category, and status
 const filterProducts = (state) => {
-    // Ensure state.products is an array before filtering
-    const products = Array.isArray(state.products) ? state.products : [];
-    
-    return products.filter((product) => {
-      const matchesCategory = state.selectedCategory
-        ? product.category.name === state.selectedCategory
-        : true;
-      const matchesStatus = state.selectedStatus
-        ? product.status === state.selectedStatus
-        : true;
-  
-      return matchesCategory && matchesStatus;
-    });
-  };
+  // Ensure state.products is an array before filtering
+  const products = Array.isArray(state.products) ? state.products : [];
+
+  return products.filter((product) => {
+    const matchesCategory = state.selectedCategory
+      ? product.category.name === state.selectedCategory
+      : true;
+    const matchesStatus = state.selectedStatus
+      ? product.status === state.selectedStatus
+      : true;
+
+    return matchesCategory && matchesStatus;
+  });
+};
 
 // Export actions
 export const {
