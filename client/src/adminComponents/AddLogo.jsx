@@ -1,16 +1,24 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDispatch, useSelector } from "react-redux";
-import { addLogo } from "@/redux/logoSlice";
+import { addLogo, editLogo, getLogo } from "@/redux/logoSlice";
 import CustomSpinner from "./CustomSpinner";
 import { toast } from "react-toastify";
+import { set } from "date-fns";
 
 const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
     const [logoImage, setLogoImage] = useState(null);
     const dispatch = useDispatch();
-    const { loading, error } = useSelector((state) => state.logo); // Get loading and error state from Redux store
+    const { logo, loading, error } = useSelector((state) => state.logo); // Get loading and error state from Redux store
+    const [uploadLoading, setUploadLoading] = useState(false);
+
+    // Fetch the existing logo on component mount
+    useEffect(() => {
+        dispatch(getLogo());
+    }, [dispatch, onLogoClose]);
+
 
     const handleImageChange = (event) => {
         const file = event.target.files[0];
@@ -32,13 +40,24 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
             formData.append("logoImage", logoImage);
 
             try {
-                // Dispatch the addLogo action and unwrap the promise
-                await dispatch(addLogo(formData)).unwrap();
-                toast.success("Logo uploaded successfully", { autoClose: 3000 });
-                onLogoClose(); // Close the dialog after successful upload
+                setUploadLoading(true);
+                if (logo[0]?.logoImage) {
+                   
+                    // If logo exists, dispatch editLogo
+                    formData.append("id", logo[0]._id); // Pass the existing logo ID for update
+                    await dispatch(editLogo(formData)).unwrap();
+                    toast.success("Logo updated successfully", { autoClose: 3000 });
+                } else {
+                    // If logo doesn't exist, dispatch addLogo
+                    await dispatch(addLogo(formData)).unwrap();
+                    toast.success("Logo uploaded successfully", { autoClose: 3000 });
+                }
+                onLogoClose();
             } catch (error) {
                 console.error("Error uploading logo:", error);
                 toast.error(error.message || "Failed to upload logo."); // Show specific error message if available
+            } finally {
+                setUploadLoading(false);
             }
         },
         [dispatch, logoImage, onLogoClose]
@@ -56,8 +75,8 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
                         {error && <p className="text-red-600">{error}</p>} {/* Show error message if exists */}
                     </div>
                     <DialogFooter className="mt-4">
-                        <Button type="submit" disabled={loading}>
-                            {loading ? <CustomSpinner /> : "Upload"}
+                        <Button type="submit" disabled={uploadLoading}>
+                            {uploadLoading ? <CustomSpinner /> : "Upload"}
                         </Button>
                         <Button type="button" variant="secondary" onClick={onLogoClose}>
                             Cancel

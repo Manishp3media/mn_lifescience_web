@@ -11,7 +11,7 @@ export const createProduct = async (req, res) => {
     try {
         // Validate input
         createProductSchema.parse(req.body);
-        const { name, description, category: categoryName, composition, use, sku  } = req.body;
+        const { name, description, category: categoryName, composition, use, sku, tags  } = req.body;
 
             // Check if SKU already exists
         const existingProduct = await Product.findOne({ sku });
@@ -26,9 +26,9 @@ export const createProduct = async (req, res) => {
            }   
 
         // Check if image is provided
-        let productImage;
-        if (req.files && req.files["productImage"]) {
-            productImage = req.files["productImage"][0].path;
+        let productImages = [];
+        if (req.files && req.files["productImages"]) {
+            productImages = req.files["productImages"].map(file => file.path);
         }
            
         // Create new product
@@ -39,7 +39,8 @@ export const createProduct = async (req, res) => {
             composition,
             use,
             sku,
-            productImage
+            tags,
+            productImages
         });
 
         // Save product to database
@@ -77,7 +78,7 @@ export const bulkUploadProducts = async (req, res) => {
                 // Validate each row using Zod schema
                 createProductSchema.parse(row);
 
-                const { name, description, category: categoryName, composition, use, sku } = row;
+                const { name, description, category: categoryName, composition, use, sku, tags } = row;
 
                 // Check if SKU already exists
                 const existingProduct = await Product.findOne({ sku });
@@ -101,6 +102,7 @@ export const bulkUploadProducts = async (req, res) => {
                     composition,
                     use,
                     sku,
+                    tags
                 });
 
                 // Save product to database
@@ -145,7 +147,7 @@ export const getAllProducts = async (req, res) => {
                     use: 1,
                     sku: 1,
                     status: 1,
-                    productImage: 1,
+                    productImages: 1,
                     createdAt: 1, // Ensure createdAt is included
                     category: {
                         _id: "$categoryDetails._id",

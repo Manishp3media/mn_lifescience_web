@@ -22,9 +22,12 @@ const productSchema = new mongoose.Schema({
     sku: {
         type: String
     },
-    productImage: {
-        type: String,
+    tags: {
+        type: [String],
     },
+    productImages: [{
+        type: String,  
+    }],
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category', // Reference to the Category model
