@@ -154,13 +154,13 @@ export const deleteProductImage = createAsyncThunk(
   async ({ id, imageId }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.patch(
+      const response = await axios.delete(
         "https://mn-life-catalogue.vercel.app/api/admin/delete/product/images",
-        { id, imageId },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          data: { id, imageId },
         }
       );
       return response.data;
@@ -293,15 +293,21 @@ const productListSlice = createSlice({
       })
       .addCase(deleteProductImage.fulfilled, (state, action) => {
         state.deleteImageStatus = "succeeded";
-        const updatedProduct = action.payload.product;
-        const index = state.products.findIndex(
-          (product) => product._id === updatedProduct._id
-        );
-        if (index !== -1) {
-          state.products[index].image = updatedProduct.image;
+        const { imageId, productId } = action.payload;  // Assuming productId is returned from the backend along with imageId
+    
+        // Find the product by productId
+        const productIndex = state.products.findIndex(product => product._id === productId);
+        
+        if (productIndex !== -1) {
+            // Remove the deleted image from the images array
+            state.products[productIndex].productImages = state.products[productIndex].productImages.filter(
+                (image) => image._id !== imageId
+            );
         }
+        
+        // Update filteredProducts as well if necessary
         state.filteredProducts = filterProducts(state);
-      })
+    })
       .addCase(deleteProductImage.rejected, (state, action) => {
         state.deleteImageStatus = "failed";
         state.error = action.payload;

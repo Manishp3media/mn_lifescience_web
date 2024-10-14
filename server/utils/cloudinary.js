@@ -120,7 +120,7 @@ export const deleteProductImage = async (req, res) => {
         await product.save();
 
         console.log(`Image with ID ${imageId} deleted successfully from product ${id}.`);
-        res.status(200).json({ message: "Image deleted successfully", imageId: imageId });
+        res.status(200).json({ message: "Image deleted successfully", productImages: product.productImages });
     } catch (err) {
         console.error(`Error deleting product image:`, err);
         res.status(500).json({ error: err.message });
