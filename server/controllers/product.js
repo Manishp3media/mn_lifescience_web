@@ -239,11 +239,13 @@ export const addProductImages = async (req, res) => {
         // Find the product in the database
         const product = await Product.findById(id);
         if (!product) {
+            console.error("Product not found for ID:", id); 
             return res.status(404).json({ message: "Product not found" });
         }
 
         // Check if new images are provided by the middleware
         if (!req.files || !req.files["productImages"]) {
+            console.error("No images provided:", JSON.stringify(req.files));  
             return res.status(400).json({ message: "No images uploaded" });
         }
 

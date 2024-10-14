@@ -170,6 +170,31 @@ export const deleteProductImage = createAsyncThunk(
   }
 );
 
+// Add Product Images
+export const addProductImages = createAsyncThunk(
+  "productList/addProductImages",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Token: ", token);
+      const response = await axios.patch(
+        // "https://mn-life-catalogue.vercel.app/api/admin/add/product/images",
+        "http://localhost:5000/api/admin/add/product/images",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+             "Content-Type": "multipart/form-data"
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error, "add product images error");
+      return rejectWithValue(error.response?.data || "Failed to add images");
+    }
+  }
+);
 
 const productListSlice = createSlice({
   name: "productList",
@@ -182,7 +207,8 @@ const productListSlice = createSlice({
     error: null,
     deleteStatus: "idle",
     bulkUploadStatus: "idle",
-    deleteImageStatus: "idle"
+    deleteImageStatus: "idle",
+    addProductImagesStatus: "idle"
   },
   reducers: {
     setSelectedCategory: (state, action) => {
@@ -291,25 +317,41 @@ const productListSlice = createSlice({
       .addCase(deleteProductImage.pending, (state) => {
         state.deleteImageStatus = "loading";
       })
+      // Handle the success case for deleting a product image
       .addCase(deleteProductImage.fulfilled, (state, action) => {
         state.deleteImageStatus = "succeeded";
-        const { imageId, productId } = action.payload;  // Assuming productId is returned from the backend along with imageId
-    
-        // Find the product by productId
-        const productIndex = state.products.findIndex(product => product._id === productId);
-        
+
+        // Find the product and update its images with the one received from the backend
+        const productIndex = state.products.findIndex(
+          (product) => product._id === action.meta.arg.id // the product id that was passed during the dispatch
+        );
+
         if (productIndex !== -1) {
-            // Remove the deleted image from the images array
-            state.products[productIndex].productImages = state.products[productIndex].productImages.filter(
-                (image) => image._id !== imageId
-            );
+          state.products[productIndex].productImages = action.payload.productImages;
         }
-        
-        // Update filteredProducts as well if necessary
         state.filteredProducts = filterProducts(state);
-    })
+      })
       .addCase(deleteProductImage.rejected, (state, action) => {
         state.deleteImageStatus = "failed";
+        state.error = action.payload;
+      })
+      // Add Product Image
+      .addCase(addProductImages.pending, (state) => {
+        state.addImageStatus = "loading";
+      })
+      .addCase(addProductImages.fulfilled, (state, action) => {
+        state.addImageStatus = "succeeded";
+        // Find the product and update its images with the one received from the backend
+        const productIndex = state.products.findIndex(
+          (product) => product._id === action.meta.arg.id // the product id that was passed during the dispatch
+        );
+        if (productIndex !== -1) {
+          state.products[productIndex].productImages = action.payload.productImages;
+        }
+        state.filteredProducts = filterProducts(state);
+      })
+      .addCase(addProductImages.rejected, (state, action) => {
+        state.addImageStatus = "failed";
         state.error = action.payload;
       });
   },
