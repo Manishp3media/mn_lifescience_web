@@ -10,6 +10,7 @@ import enquiryRoutes from "./routes/enquiry.js";
 import socialMedialLinkRoutes from "./routes/socialMediaLink.js"
 import bannerRoutes from "./routes/banner.js";
 import logoRoutes from "./routes/logo.js";
+import termsRoutes from "./routes/terms.js";
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -35,6 +36,7 @@ app.use("/api", enquiryRoutes);
 app.use("/api", socialMedialLinkRoutes);
 app.use("/api", bannerRoutes);
 app.use("/api", logoRoutes);
+app.use("/api", termsRoutes);
 
 app.get("/", (req, res) => {
     res.json({ message: "Hello World from backend"});
