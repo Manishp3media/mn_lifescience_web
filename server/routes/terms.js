@@ -5,9 +5,9 @@ import authMiddleware from "../middleware/auth.js";
 const router = express.Router();
 
 // GET terms and conditions
-router.get('/terms', authMiddleware('admin'), getTerms);
+router.get('/admin/get/terms', authMiddleware('admin'), getTerms);
 
 // PUT update terms and conditions (Admin only)
-router.put('/terms', authMiddleware('admin'), updateTerms);
+router.put('/admin/update/terms', authMiddleware('admin'), updateTerms);
 
 export default router;
