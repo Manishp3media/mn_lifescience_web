@@ -25,6 +25,11 @@ export const createProduct = async (req, res) => {
                return res.status(404).json({ message: "Category not found" });
            }   
 
+        // Check if thumbnail image is provided
+        const thumbnailImage = req.files.thumbnailImage
+        ? req.files.thumbnailImage[0].path // Extract the URL of the thumbnail image
+        : '';
+        
         // Check if image is provided
         let productImages = [];
         if (req.files && req.files["productImages"]) {
@@ -43,7 +48,8 @@ export const createProduct = async (req, res) => {
             use,
             sku,
             tags,
-            productImages
+            productImages,
+            thumbnailImage
         });
 
         // Save product to database

@@ -1,102 +1,65 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createProduct } from "@/redux/productSlice";
 import { fetchCategories } from "@/redux/categorySlice";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import CustomSpinner from "./CustomSpinner";
+import JoditEditor from 'jodit-react';
 import { toast } from "react-toastify";
 import { X } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import UsersAndTersmsNavbar from "./UsersNavbar";
 
-const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3 MB in bytes
+const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3 MB
 
-const CreateProduct = ({ isOpen, onClose }) => {
+const CreateProduct = () => {
   const dispatch = useDispatch();
   const { categories } = useSelector((state) => state.categoryList);
   const [isCreating, setIsCreating] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
   const [sizeWarning, setSizeWarning] = useState("");
-  const fileInputRef = React.useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
-  const compressImage = useCallback(async (file) => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          const scaleFactor = 0.7;
-          canvas.width = img.width * scaleFactor;
-          canvas.height = img.height * scaleFactor;
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob((blob) => {
-            resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
-          }, 'image/jpeg', 0.8);
-        };
-        img.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-  }, []);
+  const handleCategorySelect = (category) => {
+    formik.setFieldValue("category", category);
+  };
 
-  const handleFileChange = useCallback(async (e) => {
+  const handleFileChange = (e) => {
     const files = Array.from(e.currentTarget.files);
     const newImages = [];
     let totalSize = selectedImages.reduce((sum, img) => sum + img.file.size, 0);
     let warnings = [];
 
-
-    // Supported file types
     const supportedFormats = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
 
-
     for (let file of files) {
-       // Check file type
-    if (!supportedFormats.includes(file.type)) {
-      toast.error(`${file.name} is not a supported format. Please upload jpg, png, jpeg, or webp.`);
-      continue;
-    }
+      if (!supportedFormats.includes(file.type)) {
+        toast.error(`${file.name} is not a supported format. Please upload jpg, png, jpeg, or webp.`);
+        continue;
+      }
 
-      // if (file.size > MAX_FILE_SIZE) {
-      //   toast.error(`${file.name} exceeds 3 MB, Please upload a smaller image`);
-      // }
       totalSize += file.size;
       const preview = URL.createObjectURL(file);
       newImages.push({ file, preview });
     }
 
     if (totalSize > MAX_FILE_SIZE) {
-      toast.error("Total image size exceeds 3 MB, Please upload a smaller image");
+      toast.error("Total image size exceeds 3 MB. Please upload smaller images.");
     }
 
     setSelectedImages(prevImages => [...prevImages, ...newImages]);
     setSizeWarning(warnings.length > 0 ? warnings.join(". ") : "");
 
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-  }, [selectedImages]);
+  };
 
   const removeImage = (index) => {
     setSelectedImages(prevImages => {
@@ -105,24 +68,6 @@ const CreateProduct = ({ isOpen, onClose }) => {
       newImages.splice(index, 1);
       return newImages;
     });
-    updateSizeWarning();
-  };
-
-  const updateSizeWarning = () => {
-    let totalSize = selectedImages.reduce((sum, img) => sum + img.file.size, 0);
-    let warnings = [];
-
-    selectedImages.forEach(img => {
-      if (img.file.size > MAX_FILE_SIZE) {
-        toast.warning(`${img.file.name} exceeds 3 MB`);
-      }
-    });
-
-    if (totalSize > MAX_FILE_SIZE) {
-      toast.warning("Total image size exceeds 3 MB");
-    }
-
-    setSizeWarning(warnings.length > 0 ? warnings.join(". ") : "");
   };
 
   const formik = useFormik({
@@ -132,7 +77,6 @@ const CreateProduct = ({ isOpen, onClose }) => {
       composition: "",
       sku: "",
       category: "",
-      use: "",
       tags: "",
     },
     validationSchema: Yup.object({
@@ -140,7 +84,6 @@ const CreateProduct = ({ isOpen, onClose }) => {
       description: Yup.string().required("Description is required"),
       composition: Yup.string().required("Composition is required"),
       sku: Yup.string().required("SKU is required"),
-      use: Yup.string().required("Use is required"),
       category: Yup.string().required("Please select a category"),
       tags: Yup.string().optional(),
     }),
@@ -165,7 +108,7 @@ const CreateProduct = ({ isOpen, onClose }) => {
         }
       }
 
-      selectedImages.forEach((img, index) => {
+      selectedImages.forEach((img) => {
         data.append(`productImages`, img.file);
       });
 
@@ -176,174 +119,129 @@ const CreateProduct = ({ isOpen, onClose }) => {
         setSelectedImages([]);
         setSizeWarning("");
       } catch (error) {
-        const errorMessage = error || "Failed to create product";
-        if (errorMessage === "SKU already exists") {
-          toast.error("SKU already exists. Please use a different one");
-        } else {
-          toast.error(errorMessage);
-        }
+        const errorMessage = error?.message || "Failed to create product";
+        toast.error(errorMessage);
       } finally {
         setIsCreating(false);
-        onClose();
       }
     },
   });
 
-  const handleCategorySelect = (category) => {
-    formik.setFieldValue("category", category);
-  };
+  const descriptionEditorRef = useRef(null);
+  const compositionEditorRef = useRef(null);
+
+  const descriptionConfig = useMemo(() => ({
+        readonly: false,
+    height: 300,
+    width: '100%',
+    placeholder: 'Start typing...',
+    toolbarButtonSize: 'small',
+    buttons: [
+      'undo', 'redo', '|',
+      'bold', 'italic', 'underline', 'strikethrough', '|',
+      'font', 'fontsize', 'brush', 'paragraph', '|',
+      'ul', 'ol', '|',
+      'align', 'outdent', 'indent', '|',
+      'link', 'image', 'table', '|',
+      'hr', 'eraser', 'copyformat', '|',
+      'symbol', 'fullsize', 'print', 'about'
+    ],
+    uploader: {
+      insertImageAsBase64URI: true
+    },
+    removeButtons: ['file', 'video'],
+    showCharsCounter: true,
+    showWordsCounter: true,
+    showXPathInStatusbar: false,
+    askBeforePasteHTML: false,
+    askBeforePasteFromWord: false,
+    defaultActionOnPaste: 'insert_clear_html',
+  }), []);
+
+  const compositionConfig = useMemo(() => ({
+       readonly: false,
+    height: 300,
+    width: '100%',
+    placeholder: 'Start typing...',
+    toolbarButtonSize: 'small',
+    buttons: [
+      'undo', 'redo', '|',
+      'bold', 'italic', 'underline', 'strikethrough', '|',
+      'font', 'fontsize', 'brush', 'paragraph', '|',
+      'ul', 'ol', '|',
+      'align', 'outdent', 'indent', '|',
+      'link', 'image', 'table', '|',
+      'hr', 'eraser', 'copyformat', '|',
+      'symbol', 'fullsize', 'print', 'about'
+    ],
+    uploader: {
+      insertImageAsBase64URI: true
+    },
+    removeButtons: ['file', 'video'],
+    showCharsCounter: true,
+    showWordsCounter: true,
+    showXPathInStatusbar: false,
+    askBeforePasteHTML: false,
+    askBeforePasteFromWord: false,
+    defaultActionOnPaste: 'insert_clear_html',
+  }), []);
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) {
-        formik.resetForm();
-        setSelectedImages([]);
-        setSizeWarning("");
-        onClose();
-      }
-    }} className="max-w-4xl">
-      <DialogContent className="text-color-[#386D62] p-6">
-        <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">Create New Product</DialogTitle>
-        </DialogHeader>
-
-        <form
-          onSubmit={formik.handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 space-y-6 md:space-y-0"
-        >
-          <div>
-            <label className="block text-lg mb-2">Product Name</label>
-            <Input
-              name="name"
-              value={formik.values.name}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="Enter product name"
-              required
-              className="w-full p-3 text-base"
-            />
-            {formik.touched.name && formik.errors.name && (
-              <div className="text-red-500">{formik.errors.name}</div>
-            )}
+    <div className="bg-gray-100">
+      <UsersAndTersmsNavbar title="Create Product" />
+   
+    <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
+      <form onSubmit={formik.handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-2 gap-x-6">
+          {/* Left column: Product Name and SKU */}
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">Product Name</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.name}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              {formik.touched.name && formik.errors.name && (
+                <div className="text-red-500 mt-1 text-sm">{formik.errors.name}</div>
+              )}
+            </div>
+            
+            <div>
+              <label htmlFor="sku" className="block text-sm font-medium text-gray-700">SKU</label>
+              <input
+                type="text"
+                id="sku"
+                name="sku"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.sku}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              {formik.touched.sku && formik.errors.sku && (
+                <div className="text-red-500 mt-1 text-sm">{formik.errors.sku}</div>
+              )}
+            </div>
           </div>
-
+  
+          {/* Right column: Product Image */}
           <div>
-            <label className="block text-lg mb-2">Select Category</label>
-            <DropdownMenu >
-              <DropdownMenuTrigger asChild className="w-full">
-                <Button variant="outline">
-                  {formik?.values?.category || "Select Category"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {categories?.map((category) => (
-                  <DropdownMenuItem
-                    key={category._id}
-                    onClick={() => handleCategorySelect(category?.name)}
-                  >
-                    {category?.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {formik.touched.category && formik.errors.category && (
-              <div className="text-red-500">{formik.errors.category}</div>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-lg mb-2">Description</label>
-            <Input
-              name="description"
-              value={formik.values.description}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="Enter product description"
-              required
-              className="w-full p-3 text-base"
-            />
-            {formik.touched.description && formik.errors.description && (
-              <div className="text-red-500">{formik.errors.description}</div>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-lg mb-2">Composition</label>
-            <Input
-              name="composition"
-              value={formik.values.composition}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="Enter composition"
-              required
-              className="w-full p-3 text-base"
-            />
-            {formik.touched.composition && formik.errors.composition && (
-              <div className="text-red-500">{formik.errors.composition}</div>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-lg mb-2">SKU</label>
-            <Input
-              name="sku"
-              value={formik.values.sku}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="Enter SKU"
-              required
-              className="w-full p-3 text-base"
-            />
-            {formik.touched.sku && formik.errors.sku && (
-              <div className="text-red-500">{formik.errors.sku}</div>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-lg mb-2">Use</label>
-            <Input
-              name="use"
-              value={formik.values.use}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="Enter product use"
-              required
-              className="w-full p-3 text-base"
-            />
-            {formik.touched.use && formik.errors.use && (
-              <div className="text-red-500">{formik.errors.use}</div>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-lg mb-2">Tags</label>
-            <Input
-              name="tags"
-              value={formik.values.tags}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="Enter tags"
-              className="w-full p-3 text-base"
-            />
-            {formik.touched.tags && formik.errors.tags && (
-              <div className="text-red-500">{formik.errors.tags}</div>
-            )}
-          </div>
-
-          <div className="col-span-2">
-            <label className="block text-lg mb-">Product Images</label>
-            <Input
+            <label className="block text-sm font-medium text-gray-700">Product Images</label>
+            <input
               type="file"
-              name="productImages"
               onChange={handleFileChange}
               multiple
-              className="input mb-2"
+              className="mt-1 block w-full"
               ref={fileInputRef}
             />
             {sizeWarning && (
-              <div className="text-yellow-500 mb-2">Warning: {sizeWarning}</div>
+              <div className="text-yellow-500 mt-1">Warning: {sizeWarning}</div>
             )}
-            <div className="flex flex-wrap gap-2">
+            <div className="mt-2 flex flex-wrap gap-2">
               {selectedImages.map((img, index) => (
                 <div key={index} className="relative">
                   <img src={img.preview} alt={`Preview ${index + 1}`} className="w-20 h-20 object-cover" />
@@ -358,31 +256,148 @@ const CreateProduct = ({ isOpen, onClose }) => {
               ))}
             </div>
           </div>
+        </div>
+  
+        {/* Category Selection */}
+        <div className="col-span-2 md:col-span-1">
+          <label className="block text-lg mb-2">Select Category</label>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild className="w-full">
+              <Button variant="outline">
+                {formik?.values?.category || "Select Category"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {categories?.map((category) => (
+                <DropdownMenuItem
+                  key={category._id}
+                  onClick={() => handleCategorySelect(category?.name)}
+                >
+                  {category?.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {formik.touched.category && formik.errors.category && (
+            <div className="text-red-500">{formik.errors.category}</div>
+          )}
+        </div>
+  
 
-          <DialogFooter className="col-span-2">
-            <Button
-              type="submit"
-              className="bg-[#386D62] hover:bg-[#386D62] text-white px-4 py-2"
-              disabled={isCreating || sizeWarning !== ""}
-            >
-              {isCreating ? <CustomSpinner size={20} /> : "Create"}
-            </Button>
-            <Button
-              className="hover:bg-red-500"
-              onClick={() => {
-                formik.resetForm();
-                setSelectedImages([]);
-                setSizeWarning("");
-                onClose();
-              }}
-            >
-              Cancel
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <div className="flex flex-col items-center">
+  {/* Description */}
+  <div className="max-w-4xl w-full">
+    <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+    <JoditEditor
+      ref={descriptionEditorRef}
+      value={formik.values.description}
+      config={descriptionConfig}
+      tabIndex={1}
+      onBlur={(newContent) => formik.setFieldValue('description', newContent)}
+    />
+    {formik.touched.description && formik.errors.description && (
+      <div className="text-red-500 mt-1">{formik.errors.description}</div>
+    )}
+  </div>
+
+  {/* Composition */}
+  <div className="max-w-4xl w-full mt-6">
+    <label htmlFor="composition" className="block text-sm font-medium text-gray-700">Composition</label>
+    <JoditEditor
+      ref={compositionEditorRef}
+      value={formik.values.composition}
+      config={compositionConfig}
+      tabIndex={2}
+      onBlur={(newContent) => formik.setFieldValue('composition', newContent)}
+    />
+    {formik.touched.composition && formik.errors.composition && (
+      <div className="text-red-500 mt-1">{formik.errors.composition}</div>
+    )}
+  </div>
+</div>
+
+  
+        {/* Tags */}
+        <div className="max-w-4xl ">
+          <label htmlFor="tags" className="block text-sm font-medium text-gray-700">Tags</label>
+          <input
+            type="text"
+            id="tags"
+            name="tags"
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.tags}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          />
+          {formik.touched.tags && formik.errors.tags && (
+            <div className="text-red-500 mt-1">{formik.errors.tags}</div>
+          )}
+        </div>
+  
+        {/* Submit Button */}
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={isCreating}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            {isCreating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Create Product'}
+          </button>
+        </div>
+      </form>
+    </div>
+    </div>
   );
 };
 
 export default CreateProduct;
+
+ {/* <div>
+          <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
+          <select
+            id="category"
+            name="category"
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.category}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          >
+            <option value="">Select a category</option>
+            {categories.map((category) => (
+              <option key={category._id} value={category.name}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+          {formik.touched.category && formik.errors.category && (
+            <div className="text-red-500 mt-1">{formik.errors.category}</div>
+          )}
+        </div> */}
+
+      //   <div>
+      //   <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+      //   <JoditEditor
+      //     ref={null}
+      //     value={formik.values.description}
+      //     config={editorConfig}
+      //     tabIndex={1}
+      //     onBlur={(newContent) => formik.setFieldValue('description', newContent)}
+      //   />
+      //   {formik.touched.description && formik.errors.description && (
+      //     <div className="text-red-500 mt-1">{formik.errors.description}</div>
+      //   )}
+      // </div>
+
+      // <div>
+      //   <label htmlFor="composition" className="block text-sm font-medium text-gray-700">Composition</label>
+      //   <JoditEditor
+      //     ref={null}
+      //     value={formik.values.composition}
+      //     config={editorConfig}
+      //     tabIndex={2}
+      //     onBlur={(newContent) => formik.setFieldValue('composition', newContent)}
+      //   />
+      //   {formik.touched.composition && formik.errors.composition && (
+      //     <div className="text-red-500 mt-1">{formik.errors.composition}</div>
+      //   )}
+      // </div>

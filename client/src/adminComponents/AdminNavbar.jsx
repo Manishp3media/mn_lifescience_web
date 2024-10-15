@@ -116,13 +116,13 @@ const AdminNavbar = ({ title, onSearch }) => {
                                 ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        <Button
+                        {/* <Button
                             className="bg-green-500 hover:bg-green-600 text-white"
                             onClick={handleOpenModal}
                         >
                             <Plus className="mr-2 h-5 w-5" />
                             Add Product
-                        </Button>
+                        </Button> */}
                         <Button
                             className="bg-green-500 hover:bg-green-600 text-white"
                             onClick={handleOpenBulkUploadModal}
@@ -151,7 +151,7 @@ const AdminNavbar = ({ title, onSearch }) => {
                     )}
                 </div>
             </div>
-            {isModalOpen && <CreateProduct isOpen={isModalOpen} onClose={handleCloseModal} />}
+            {/* {isModalOpen && <CreateProduct isOpen={isModalOpen} onClose={handleCloseModal} />} */}
             {isBulkUploadModalOpen && <ProductBulkUploadDialog isBulkOpen={isBulkUploadModalOpen} onBulkClose={handleCloseBulkUploadModal} />}
         </nav>
     );
