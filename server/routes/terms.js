@@ -1,5 +1,5 @@
 import express from 'express';
-import { getTerms, updateTerms } from "../controllers/terms";
+import { getTerms, updateTerms } from "../controllers/terms.js";
 import authMiddleware from "../middleware/auth.js";
 
 const router = express.Router();
