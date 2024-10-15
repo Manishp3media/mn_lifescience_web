@@ -65,17 +65,28 @@ const CreateProduct = ({ isOpen, onClose }) => {
     let totalSize = selectedImages.reduce((sum, img) => sum + img.file.size, 0);
     let warnings = [];
 
+
+    // Supported file types
+    const supportedFormats = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+
+
     for (let file of files) {
-      if (file.size > MAX_FILE_SIZE) {
-        warnings.push(`${file.name} exceeds 3 MB`);
-      }
+       // Check file type
+    if (!supportedFormats.includes(file.type)) {
+      toast.error(`${file.name} is not a supported format. Please upload jpg, png, jpeg, or webp.`);
+      continue;
+    }
+
+      // if (file.size > MAX_FILE_SIZE) {
+      //   toast.error(`${file.name} exceeds 3 MB, Please upload a smaller image`);
+      // }
       totalSize += file.size;
       const preview = URL.createObjectURL(file);
       newImages.push({ file, preview });
     }
 
     if (totalSize > MAX_FILE_SIZE) {
-      warnings.push("Total image size exceeds 3 MB");
+      toast.error("Total image size exceeds 3 MB, Please upload a smaller image");
     }
 
     setSelectedImages(prevImages => [...prevImages, ...newImages]);
@@ -103,12 +114,12 @@ const CreateProduct = ({ isOpen, onClose }) => {
 
     selectedImages.forEach(img => {
       if (img.file.size > MAX_FILE_SIZE) {
-        warnings.push(`${img.file.name} exceeds 3 MB`);
+        toast.warning(`${img.file.name} exceeds 3 MB`);
       }
     });
 
     if (totalSize > MAX_FILE_SIZE) {
-      warnings.push("Total image size exceeds 3 MB");
+      toast.warning("Total image size exceeds 3 MB");
     }
 
     setSizeWarning(warnings.length > 0 ? warnings.join(". ") : "");
@@ -138,7 +149,7 @@ const CreateProduct = ({ isOpen, onClose }) => {
         toast.error("Please address the image size warnings before submitting.");
         return;
       }
-      
+
       if (selectedImages.length === 0) {
         toast.error("Please select at least one image.");
         return;
@@ -190,7 +201,7 @@ const CreateProduct = ({ isOpen, onClose }) => {
         setSizeWarning("");
         onClose();
       }
-    }} className="max-w-4xl"> 
+    }} className="max-w-4xl">
       <DialogContent className="text-color-[#386D62] p-6">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">Create New Product</DialogTitle>
@@ -217,7 +228,7 @@ const CreateProduct = ({ isOpen, onClose }) => {
           </div>
 
           <div>
-          <label className="block text-lg mb-2">Select Category</label>
+            <label className="block text-lg mb-2">Select Category</label>
             <DropdownMenu >
               <DropdownMenuTrigger asChild className="w-full">
                 <Button variant="outline">

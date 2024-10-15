@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { fetchUsers } from "@/redux/usersSlice";
 import moment from "moment";
+import UsersAndTersmsNavbar from "@/adminComponents/UsersNavbar";
 
 const Users = () => {
     const dispatch = useDispatch();
@@ -31,7 +32,7 @@ const Users = () => {
 
     return (
         <div>
-            <AdminNavbar title="Users" />
+            <UsersAndTersmsNavbar title="Users" />
             <div className="p-4">
             <Table >
                 <TableHeader>

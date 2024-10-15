@@ -25,9 +25,6 @@ export const userSignup = async (req, res) => {
         console.log("User saved successfully");
         // Send response with OTP (mock)
         res.status(200).json({ message: 'OTP generated successfully', otp });
-
-
-
     } catch (err) {
         if (err instanceof z.ZodError) {
             return res.status(422).json({ errors: err.errors });

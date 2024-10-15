@@ -28,7 +28,7 @@ const AdminLogin = () => {
             // Check if the request was fulfilled successfully
             if (result.meta.requestStatus === 'fulfilled') {
                 toast.success("Signed In Successfully!", { autoClose: 3000 });
-                navigate('/admin/dashboard/enquries');
+                navigate('/admin/dashboard/enquiries');
                 
             } else if (result.error && result.error.status === 400) {
                 // If the status is 400, show invalid credentials error
