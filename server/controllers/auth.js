@@ -17,15 +17,17 @@ export const userSignup = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Generate OTP
+        // Generate OTP (you should integrate a real OTP sending logic here)
         const otp = otpGenerator.generate(6, { digits: true, lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
 
-        // Here, you would typically send OTP via SMS using an SMS API
+        // Send response with OTP (mock)
         res.status(200).json({ message: 'OTP generated successfully', otp });
-        
-        // Save the user temporarily (could also create an OTP expiration logic if needed)
+
+        // Save the new user
         const newUser = new User({ name, mobileNumber, city, clinicName, speciality });
-        await newUser.save();
+        await newUser.save();  // Make sure the user is saved
+        console.log("User saved successfully");
+
     } catch (err) {
         if (err instanceof z.ZodError) {
             return res.status(422).json({ errors: err.errors });
@@ -56,6 +58,7 @@ export const userLogin = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
 
 export const adminLogin = async (req, res) => {
     try {

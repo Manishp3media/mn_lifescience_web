@@ -178,8 +178,8 @@ export const addProductImages = createAsyncThunk(
       const token = localStorage.getItem("token");
       console.log("Token: ", token);
       const response = await axios.patch(
-        // "https://mn-life-catalogue.vercel.app/api/admin/add/product/images",
-        "http://localhost:5000/api/admin/add/product/images",
+        "https://mn-life-catalogue.vercel.app/api/admin/add/product/images",
+       
         formData,
         {
           headers: {
@@ -337,21 +337,30 @@ const productListSlice = createSlice({
       })
       // Add Product Image
       .addCase(addProductImages.pending, (state) => {
-        state.addImageStatus = "loading";
+        console.log('addProductImages: pending');
+        state.addImageStatus = 'loading';
       })
       .addCase(addProductImages.fulfilled, (state, action) => {
-        state.addImageStatus = "succeeded";
-        // Find the product and update its images with the one received from the backend
-        const productIndex = state.products.findIndex(
-          (product) => product._id === action.meta.arg.id // the product id that was passed during the dispatch
-        );
-        if (productIndex !== -1) {
-          state.products[productIndex].productImages = action.payload.productImages;
-        }
-        state.filteredProducts = filterProducts(state);
+        console.log('addProductImages: fulfilled', action.payload);
+        state.addImageStatus = 'succeeded';
+        const productId = action.meta.arg.productId; // Pass productId in your thunk argument
+        const updateProductImages = (productArray) => {
+          const index = productArray.findIndex((product) => product._id === productId);
+          if (index !== -1) {
+            // Update the productImages
+            productArray[index].productImages = productImages;
+          } else {
+            console.log(`Product with id ${productId} not found.`);
+          }
+        };
+        
+        // Update images in both main products and filtered products
+        updateProductImages(state.products);
+        updateProductImages(state.filteredProducts);
       })
       .addCase(addProductImages.rejected, (state, action) => {
-        state.addImageStatus = "failed";
+        console.log('addProductImages: rejected', action.payload);
+        state.addImageStatus = 'failed';
         state.error = action.payload;
       });
   },

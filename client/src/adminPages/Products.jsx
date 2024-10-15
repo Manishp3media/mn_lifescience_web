@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AdminNavbar from "@/adminComponents/AdminNavbar";
 import {
@@ -77,8 +77,9 @@ const Products = () => {
         }
     };
 
-    const handleAddImages = async (productId, files) => {
+    const handleAddImages = useCallback(async (productId, files) => {
         setAddingImagesProductId(productId);
+        console.log("Adding images for product:", productId);
         try {
             const formData = new FormData();
             formData.append('id', productId); // Append product ID
@@ -89,11 +90,12 @@ const Products = () => {
             await dispatch(addProductImages(formData)).unwrap(); // Pass the formData directly
             toast.success("Images added successfully");
         } catch (error) {
+            console.error('Error adding images:', error);
             toast.error(error?.message || "Failed to add images");
         } finally {
             setAddingImagesProductId(null);
         }
-    };
+    }, [dispatch]);
 
 return (
     <div >
@@ -115,6 +117,7 @@ return (
                 </TableHeader>
                 <TableBody >
                     {filteredAndSearchedProducts.map((product) => (
+                        
                         <TableRow key={product?._id}>
                             <TableCell>
                             <ProductImagesPopup
