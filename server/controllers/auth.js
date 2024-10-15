@@ -19,14 +19,14 @@ export const userSignup = async (req, res) => {
 
         // Generate OTP (you should integrate a real OTP sending logic here)
         const otp = otpGenerator.generate(6, { digits: true, lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
-
-        // Send response with OTP (mock)
-        res.status(200).json({ message: 'OTP generated successfully', otp });
-
         // Save the new user
         const newUser = new User({ name, mobileNumber, city, clinicName, speciality });
         await newUser.save();  // Make sure the user is saved
         console.log("User saved successfully");
+        // Send response with OTP (mock)
+        res.status(200).json({ message: 'OTP generated successfully', otp });
+
+
 
     } catch (err) {
         if (err instanceof z.ZodError) {
@@ -122,7 +122,7 @@ export const createAdmin = async (req, res) => {
 export const getUsers = async (req, res) => {
     try {
         const users = await User.find({ role: 'user' })
-        .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 });
         res.status(200).json(users);
     } catch (err) {
         res.status(500).json({ error: err.message });
