@@ -1,38 +1,47 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchTerms, updateTerms } from "@/redux/termsSlice";
 import JoditEditor from 'jodit-react';
 
 const TermsAndConditions = () => {
-    const [content, setContent] = useState('');
+    const dispatch = useDispatch();
+    const editor = useRef(null);
+    const { content, status, error } = useSelector((state) => state.terms);
+    const [termsContent, setTermsContent] = useState(content);
 
-    const config = {
-        // Add your configuration options here
-        toolbar: [
-            'bold',
-            'italic',
-            'underline',
-            '|',
-            'ul',
-            'ol',
-            '|',
-            'image',
-            'table',
-            '|',
-            'link',
-            'align',
-            'undo',
-            'redo',
-        ],
-        // Other config options can be added here
+    useEffect(() => {
+        if (status === 'idle') {
+            dispatch(fetchTerms());
+        }
+    }, [status, dispatch]);
+
+    useEffect(() => {
+        setTermsContent(content);
+    }, [content]);
+
+    const handleSave = () => {
+        dispatch(updateTerms(termsContent));
     };
 
     return (
-        <div>
-            <JoditEditor
-                value={content}
-                config={config}
-                tabIndex={1} // tabIndex of textarea
-                onChange={(newContent) => setContent(newContent)}
-            />
+        <div className="terms-editor-container">
+            <h1>Terms and Conditions</h1>
+            {status === 'loading' && <p>Loading...</p>}
+            {error && <p>Error: {error}</p>}
+            {status === 'succeeded' && (
+                <>
+                    <JoditEditor
+                        ref={editor}
+                        value={termsContent}
+                        tabIndex={1}
+                        onBlur={newContent => setTermsContent(newContent)}
+                        onChange={newContent => {}}
+                    />
+                    <button onClick={handleSave} className="save-btn">
+                        Save
+                    </button>
+                </>
+            )}
         </div>
     );
 };

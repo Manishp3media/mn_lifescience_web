@@ -1,15 +1,65 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-export const fetchTerms = createAsyncThunk('terms/fetchTerms', async () => {
-    const response = await axios.get('/api/terms');
-    return response.data;
+export const fetchProducts = createAsyncThunk(
+    "productList/fetchProducts",
+    async (_, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(
+                "https://mn-life-catalogue.vercel.app/api/admin/get/products",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            return response.data.products;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || "Failed to fetch products");
+        }
+    }
+);
+
+export const fetchTerms = createAsyncThunk(
+    'terms/fetchTerms', 
+    async (_,{ rejectWithValue }) => {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('https://mn-life-catalogue.vercel.app/api/admin/get/terms',
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data || 'Failed to fetch terms');
+    }
 });
 
-export const updateTerms = createAsyncThunk('terms/updateTerms', async (content) => {
-    const response = await axios.put('/api/terms', { content });
-    return response.data;
-});
+export const updateTerms = createAsyncThunk(
+    'terms/updateTerms',
+    async (content, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token'); // Get token from local storage
+
+            // Set the Authorization header
+            const response = await axios.put('https://mn-life-catalogue.vercel.app/api/apiadmin/update/terms', { content }, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Add the token to headers
+                },
+            });
+
+            return response.data; // Return the response data on success
+        } catch (error) {
+            // Use rejectWithValue to return the error message
+            return rejectWithValue(error.response?.data || 'Something went wrong');
+        }
+    }
+);
 
 const termsSlice = createSlice({
     name: 'terms',

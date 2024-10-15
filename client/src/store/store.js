@@ -7,6 +7,7 @@ import usersSlice from "../redux/usersSlice";
 import bannerSlice from "../redux/bannerSlice";
 import socialMediaLinkSlice from "../redux/socialMediaSlice";
 import logoSlice from "../redux/logoSlice";
+import termsSlice from "../redux/termsSlice";
 
 const store = configureStore({
   reducer: {
@@ -17,7 +18,8 @@ const store = configureStore({
     usersList: usersSlice,
     bannerList: bannerSlice,
     sociaLMediaLink: socialMediaLinkSlice,
-    logo: logoSlice
+    logo: logoSlice,
+    terms: termsSlice
   },
 });
 
