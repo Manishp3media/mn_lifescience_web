@@ -10,6 +10,7 @@ import Enquiries from "./adminPages/Enquries";
 import Users from "./adminPages/Users";
 import Categories from "./adminPages/Categories";
 import AdminOptions from "./adminPages/AdminOptions";
+import TermsAndConditions from "./adminPages/TermsAndConditions";
 
 const DashboardLayout = () => {
   return (
@@ -34,6 +35,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/termsandconditions" element={<TermsAndConditions />} />
         <Route
           path="/admin/dashboard/*"
           element={
