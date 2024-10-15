@@ -127,8 +127,6 @@ export const deleteProductImage = async (req, res) => {
     }
 };
 
-
-
 // Edit Product
 export const editProduct = async (req, res) => {
     try {

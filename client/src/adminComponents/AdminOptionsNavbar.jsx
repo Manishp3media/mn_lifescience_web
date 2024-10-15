@@ -67,6 +67,12 @@ const AdminOptionsNavbar = () => {
                             <Plus className="mr-2 h-5 w-5" />
                             Add Social Media Links
                         </Button>
+                        <Button
+                            className="bg-green-500 hover:bg-green-600 text-white"
+                        >
+                            <Plus className="mr-2 h-5 w-5" />
+                            Add Term and Conditions
+                        </Button>
                     </div>
                 </div>
 

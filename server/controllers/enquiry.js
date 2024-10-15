@@ -1,11 +1,13 @@
 import Enquiry from "../models/Enquiry.js";
 import Product from "../models/Product.js";
+import Cart from "../models/Cart.js";
 
+// Create an enquiry
 // Create an enquiry
 export const createEnquiry = async (req, res) => {
     try {
-        const { productIds } = req.body; // Assuming products are sent as an array of product IDs
-        const id = req.user.id; // Assuming you're using JWT to identify the user
+        const { productIds } = req.body; 
+        const id = req.user.id; 
 
         // Validate that the products exist
         const products = await Product.find({ _id: { $in: productIds } });
@@ -22,12 +24,27 @@ export const createEnquiry = async (req, res) => {
 
         // Save the enquiry to the database
         await newEnquiry.save();
+        console.log("Enquiry created successfully:", newEnquiry);
 
-        res.status(201).json({ message: "Enquiry created successfully", enquiry: newEnquiry });
+        // Empty the user's cart
+        const updatedCart = await Cart.findOneAndUpdate(
+            { user: id }, // Find the cart for the user
+            { items: [] }, // Set the items array to an empty array
+            { new: true } // Return the updated cart
+        );
+
+        // Check if the cart was found and updated
+        if (!updatedCart) {
+            return res.status(404).json({ message: "Cart not found for user" });
+        }
+
+        res.status(201).json({ message: "Enquiry created successfully and cart emptied", enquiry: newEnquiry });
     } catch (err) {
+        console.error("Error creating enquiry:", err.message); // Log error for debugging
         res.status(500).json({ error: err.message });
     }
-}; 
+};
+
 
 // Get All Enquiries
 export const getEnquiries = async (req, res) => {

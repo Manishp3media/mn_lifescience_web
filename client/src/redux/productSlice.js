@@ -58,12 +58,13 @@ export const updateProduct = createAsyncThunk(
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
+            // "Content-Type": "multipart/form-data",
           },
         }
       );
       return response.data.product;
     } catch (error) {
+      console.log(error, "edit product error");
       return rejectWithValue(error.response?.data || "Failed to update product");
     }
   }

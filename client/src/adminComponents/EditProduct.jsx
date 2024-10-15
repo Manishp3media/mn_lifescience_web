@@ -20,7 +20,7 @@ const EditProduct = ({ isOpen, onClose, product }) => {
     const dispatch = useDispatch();
     const { categories } = useSelector((state) => state.categoryList);
     const [isUpdating, setIsUpdating] = useState(false);
-    
+
     useEffect(() => {
         dispatch(fetchCategories());
     }, [dispatch]);
@@ -34,7 +34,9 @@ const EditProduct = ({ isOpen, onClose, product }) => {
             composition: product?.composition || "",
             sku: product?.sku || "",
             category: product?.category?._id || "",
-            productImage: null,
+            tags: product?.tags ? product.tags.join(", ") : "",
+
+            // productImage: null,
         },
         validationSchema: Yup.object({
             name: Yup.string().required("Product name is required"),
@@ -42,19 +44,40 @@ const EditProduct = ({ isOpen, onClose, product }) => {
             composition: Yup.string().required("Composition is required"),
             sku: Yup.string().required("SKU is required"),
             category: Yup.string().required("Please select a category"),
-            productImage: Yup.mixed().nullable(), // Allow null for editing
+            use: Yup.string().required("Use is required"),
+            tags: Yup.string().optional(),
+            // productImage: Yup.mixed().nullable(), // Allow null for editing
         }),
         onSubmit: async (values) => {
             setIsUpdating(true);
-            const data = new FormData();
-            for (const key in values) {
-                if (values[key] !== null && values[key] !== undefined) {
-                    data.append(key, values[key]);
-                    console.log(key, values[key]);
-                }
-            }
+            // const data = new FormData();
+            // for (const key in values) {
+            //     if (values[key] !== null && values[key] !== undefined) {
+            //         data.append(key, values[key]);
+            //         console.log(key, values[key]);
+            //     }
+            // }
+
+    //         // Log before splitting the tags
+    //   console.log("Tags before splitting:", values.tags);
+
+    //         // Convert the comma-separated string to an array of tags
+    //         // const tagsArray = values.tags.split(",").map(tag => tag.trim());
+
+
+    //            // Log after splitting the tags
+    //   console.log("Tags after splitting:", tagsArray);
+    //         const updatedValues = {
+    //             ...values,
+    //             tags: values.tags,  // Replace the string with an array for submission
+    //         };
+
+
+    //   // Log the data being sent to the backend
+    //   console.log("Submitting updated values:", updatedValues);
+
             try {
-                await dispatch(updateProduct(data)).unwrap();
+                await dispatch(updateProduct(values)).unwrap();
                 toast.success("Product updated successfully");
                 formik.resetForm();
                 onClose();
@@ -89,7 +112,8 @@ const EditProduct = ({ isOpen, onClose, product }) => {
                 composition: product?.composition,
                 sku: product?.sku,
                 category: product?.category?._id || "",
-                productImage: null, // Reset image on edit
+                use: product?.use,
+                tags: product?.tags || [],
             });
         }
     }, [product]);
@@ -187,6 +211,36 @@ const EditProduct = ({ isOpen, onClose, product }) => {
                     </div>
 
                     <div>
+                        <label className="block">use</label>
+                        <Input
+                            name="use"
+                            value={formik.values.use}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            placeholder="Enter use"
+                            required
+                        />
+                        {formik.touched.use && formik.errors.use && (
+                            <div className="text-red-500">{formik.errors.use}</div>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="block">tags</label>
+                        <Input
+                            name="tags"
+                            value={formik.values.tags}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            placeholder="Enter tags"
+                            required
+                        />
+                        {formik.touched.tags && formik.errors.tags && (
+                            <div className="text-red-500">{formik.errors.tags}</div>
+                        )}
+                    </div>
+
+                    {/* <div>
                         <label className="block">Product Image</label>
                         <Input
                             type="file"
@@ -197,7 +251,7 @@ const EditProduct = ({ isOpen, onClose, product }) => {
                         {formik.touched.productImage && formik.errors.productImage && (
                             <div className="text-red-500">{formik.errors.productImage}</div>
                         )}
-                    </div>
+                    </div> */}
 
                     <DialogFooter>
                         <Button type="submit" className="bg-[#386D62] hover:bg-[#386D62]" disabled={isUpdating}>
