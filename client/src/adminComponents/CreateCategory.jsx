@@ -13,6 +13,13 @@ const CreateCategory = ({ isOpen, onClose }) => {
     const dispatch = useDispatch();
     const { categories, createCategoryLoading } = useSelector((state) => state.categoryList); 
     const [isCreating, setIsCreating] = useState(false);
+    const [categoryLogo, setcategoryLogo] = useState(null);
+
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        console.log("Selected image file:", file);
+        setcategoryLogo(file);
+    };
 
     // Formik with initial values and Yup validation schema
     const formik = useFormik({
@@ -24,10 +31,16 @@ const CreateCategory = ({ isOpen, onClose }) => {
         }),
         onSubmit: async (values) => {
             setIsCreating(true);
-            const data = { ...values };
+
+            // Create FormData object
+            const formData = new FormData();
+            formData.append("name", values.name);
+            if (categoryLogo) {
+                formData.append("categoryLogo", categoryLogo);
+            }
       
             try {
-              await dispatch(createCategory(data)).unwrap();
+              await dispatch(createCategory(formData)).unwrap();
               toast.success("Product created successfully");
               formik.resetForm();
             } catch (error) {
@@ -66,6 +79,12 @@ const CreateCategory = ({ isOpen, onClose }) => {
                             <div className="text-red-500">{formik.errors.name}</div>
                         )}
                     </div>
+
+                    <div>
+                        <label className="block mb-1">Category Logo</label>
+                        <Input type="file" name="categoryLogo" onChange={handleImageChange} accept="image/*" />
+                    </div>
+
 
                     <DialogFooter>
                         <Button type="submit" className="bg-[#386D62] hover:bg-[#386D62]" disabled={isCreating}>

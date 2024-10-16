@@ -1,14 +1,22 @@
 import CategoryNavbar from "@/adminComponents/CategoryNavbar";
-import React  from "react";
+import React from "react";
 import { fetchCategories } from "@/redux/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 
 const Categories = () => {
-    
-    const { categories } = useSelector((state) => state.categoryList); 
+
+    const { categories } = useSelector((state) => state.categoryList);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -19,22 +27,33 @@ const Categories = () => {
         <div>
             <CategoryNavbar />
             <div className="p-4">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Name</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {categories.map((category) => (
-                        <TableRow key={category._id}>
-                            <TableCell>
-                                {category.name}
-                            </TableCell>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Logo</TableHead>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableHeader>
+                    <TableBody>
+                        {categories?.map((category) => (
+                            <TableRow key={category._id}>
+                                <TableCell>
+                                    {category?.name}
+                                </TableCell>
+                                <TableCell>
+                                    <Dialog>
+                                        <DialogTrigger>View Logo</DialogTrigger>
+                                        <DialogContent>
+                                            {category?.categoryLogo ? <img src={category?.categoryLogo} alt="logo" /> : <p>No logo available</p>}
+                                        </DialogContent>
+                                    </Dialog>
+
+
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </div>
         </div>
     )
