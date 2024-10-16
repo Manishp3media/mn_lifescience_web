@@ -6,6 +6,9 @@ const categorySchema = new mongoose.Schema({
         required: true,
         unique: true, // Ensure category names are unique
     },
+    categoryLogo: {
+        type: String,
+    }
 }, {
     timestamps: true, // Adds createdAt and updatedAt timestamps
 });

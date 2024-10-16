@@ -11,13 +11,18 @@ export const createCategory = async (req, res) => {
         const categoryName = name.toLowerCase();
 
         // Check if category already exists
-        const existingCategory = await Category.findOne({ categoryName }); // Case-insensitive search
+        const existingCategory = await Category.findOne({ name: { $regex: new RegExp("^" + categoryName + "$", "i") } }); // Case-insensitive search
         if (existingCategory) {
             return res.status(400).json({ message: 'Category already exists' });
         }   
 
+         // Check if category image is provided
+         const categoryLogo = req.files.categoryLogo
+         ? req.files.categoryLogo[0].path // Extract the URL of the thumbnail image
+         : '';
+
         // Create new category
-        const category = new Category({ name: categoryName });
+        const category = new Category({ name: categoryName, categoryLogo });
         await category.save();   // Save category to database
 
         res.status(201).json({ message: 'Category created successfully', category });

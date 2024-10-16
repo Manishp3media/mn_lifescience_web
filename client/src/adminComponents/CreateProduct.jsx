@@ -21,6 +21,8 @@ const CreateProduct = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [sizeWarning, setSizeWarning] = useState("");
   const fileInputRef = useRef(null);
+  const thumbnailInputRef = useRef(null);
+  const [thumbnailImage, setThumbnailImage] = useState(null);
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -93,10 +95,15 @@ const CreateProduct = () => {
         return;
       }
 
-      if (selectedImages.length === 0) {
-        toast.error("Please select at least one image.");
+      if (!thumbnailImage) {
+        toast.error("Please upload a thumbnail image.");
         return;
       }
+
+      // if (selectedImages.length === 0) {
+      //   toast.error("Please select at least one image.");
+      //   return;
+      // }
 
       setIsCreating(true);
       const data = new FormData();
@@ -108,6 +115,9 @@ const CreateProduct = () => {
         }
       }
 
+       // Append thumbnail image
+       data.append("thumbnailImage", thumbnailImage.file);
+
       selectedImages.forEach((img) => {
         data.append(`productImages`, img.file);
       });
@@ -117,6 +127,7 @@ const CreateProduct = () => {
         toast.success("Product created successfully");
         formik.resetForm();
         setSelectedImages([]);
+        setThumbnailImage(null);
         setSizeWarning("");
       } catch (error) {
         const errorMessage = error?.message || "Failed to create product";
@@ -127,6 +138,7 @@ const CreateProduct = () => {
     },
   });
 
+  // Text Editor Config
   const descriptionEditorRef = useRef(null);
   const compositionEditorRef = useRef(null);
 
@@ -186,6 +198,20 @@ const CreateProduct = () => {
     defaultActionOnPaste: 'insert_clear_html',
   }), []);
 
+  const handleThumbnailChange = (e) => {
+    const file = e.target.files[0];
+    if (file && ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(file.type)) {
+      setThumbnailImage({ file, preview: URL.createObjectURL(file) });
+    } else {
+      toast.error("Unsupported format. Please upload jpg, png, jpeg, or webp.");
+    }
+
+    if (thumbnailInputRef.current) {
+      thumbnailInputRef.current.value = "";
+    }
+  };
+  
+
   return (
     <div className="bg-gray-100">
       <UsersAndTersmsNavbar title="Create Product" />
@@ -227,35 +253,31 @@ const CreateProduct = () => {
               )}
             </div>
           </div>
-  
-          {/* Right column: Product Image */}
+
+          {/* Thumbnail Image */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Product Images</label>
+            <label className="block text-sm font-medium text-gray-700">Thumbnail Image</label>
             <input
               type="file"
-              onChange={handleFileChange}
-              multiple
+              onChange={handleThumbnailChange}
               className="mt-1 block w-full"
-              ref={fileInputRef}
+              ref={thumbnailInputRef}
             />
-            {sizeWarning && (
-              <div className="text-yellow-500 mt-1">Warning: {sizeWarning}</div>
+            {thumbnailImage && (
+              <div className="mt-2 relative">
+                <img src={thumbnailImage.preview} alt="Thumbnail Preview" className="w-20 h-20 object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setThumbnailImage(null)}
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                >
+                  <X size={16} />
+                </button>
+              </div>
             )}
-            <div className="mt-2 flex flex-wrap gap-2">
-              {selectedImages.map((img, index) => (
-                <div key={index} className="relative">
-                  <img src={img.preview} alt={`Preview ${index + 1}`} className="w-20 h-20 object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
           </div>
+  
+          
         </div>
   
         {/* Category Selection */}
@@ -333,6 +355,35 @@ const CreateProduct = () => {
             <div className="text-red-500 mt-1">{formik.errors.tags}</div>
           )}
         </div>
+
+        {/* Product Image */}
+        <div>
+            <label className="block text-sm font-medium text-gray-700">Product Images</label>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              multiple
+              className="mt-1 block w-full"
+              ref={fileInputRef}
+            />
+            {sizeWarning && (
+              <div className="text-yellow-500 mt-1">Warning: {sizeWarning}</div>
+            )}
+            <div className="mt-2 flex flex-wrap gap-2">
+              {selectedImages.map((img, index) => (
+                <div key={index} className="relative">
+                  <img src={img.preview} alt={`Preview ${index + 1}`} className="w-20 h-20 object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
   
         {/* Submit Button */}
         <div className="flex justify-end">

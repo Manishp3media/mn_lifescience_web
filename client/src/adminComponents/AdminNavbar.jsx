@@ -79,7 +79,7 @@ const AdminNavbar = ({ title, onSearch }) => {
                                     id="search"
                                     name="search"
                                     className="block w-full pl-10 pr-3 py-2 border border-transparent rounded-md leading-5 bg-white bg-opacity-25 text-white placeholder-white focus:outline-none focus:bg-white focus:text-gray-900 focus:placeholder-gray-400 focus:ring-0 sm:text-sm"
-                                    placeholder="Search products"
+                                    placeholder="Search by product name or SKU"
                                     type="search"
                                     value={searchTerm}
                                     onChange={handleSearch}

@@ -5,7 +5,6 @@ import Category from "../models/Category.js";
 import mongoose from 'mongoose';
 import XLSX from "xlsx";
 
-
 // Create Product
 export const createProduct = async (req, res) => {
     try {

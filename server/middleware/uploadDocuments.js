@@ -16,6 +16,10 @@ export const uploadLogoImage = upload.fields([
     { name: "logoImage", maxCount: 1 } 
 ]);
 
+export const uploadCategoryLogo = upload.fields([
+    { name: "categoryLogo", maxCount: 1 }
+])
+
 // Set up multer for handling Excel file uploads (store files temporarily in memory or disk)
 const excelStorage = multer.memoryStorage(); // Storing files in memory, no need to save on disk
 
