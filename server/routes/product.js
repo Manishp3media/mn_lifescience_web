@@ -4,7 +4,7 @@ import authMiddleware from "../middleware/auth.js";
 import { uploadProductImage, uploadExcelFile } from "../middleware/uploadDocuments.js";
 import { deleteProduct, editProduct, deleteProductImage } from "../utils/cloudinary.js";
 
-const router = express.Router();
+const router = express.Router(); 
 
 // Create Product
 router.post("/admin/create/product",authMiddleware('admin'),  uploadProductImage, createProduct);
