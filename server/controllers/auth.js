@@ -5,53 +5,26 @@ import User from "../models/User.js";
 import z from "zod";
 import otpGenerator from "otp-generator";
 
-// export const userSignup = async (req, res) => {
-//     try {
-//         // Validate input
-//         userSignupSchema.parse(req.body);
-//         const { name, mobileNumber, city, clinicName, speciality } = req.body;
-
-//         // Check if user already exists
-//         const existingUser = await User.findOne({ mobileNumber });
-//         if (existingUser) {
-//             return res.status(400).json({ message: 'User already exists' });
-//         }
-
-//         // Generate OTP (you should integrate a real OTP sending logic here)
-//         const otp = otpGenerator.generate(6, { digits: true, lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
-//         // Save the new user
-//         const newUser = new User({ name, mobileNumber, city, clinicName, speciality });
-//         await newUser.save();  // Make sure the user is saved
-//         console.log("User saved successfully");
-//         // Send response with OTP (mock)
-//         res.status(200).json({ message: 'OTP generated successfully', otp });
-//     } catch (err) {
-//         if (err instanceof z.ZodError) {
-//             return res.status(422).json({ errors: err.errors });
-//         }
-//         res.status(500).json({ error: err.message });
-//     }
-// };
-
-export const userLogin = async (req, res) => {
+export const userSignup = async (req, res) => {
     try {
         // Validate input
-        userLoginSchema.parse(req.body);
-        const { mobileNumber } = req.body;
+        userSignupSchema.parse(req.body);
+        const { name, mobileNumber, city, clinicName, speciality } = req.body;
 
-        // Check if user exists
-        let user = await User.findOne({ mobileNumber });
-        if (!user) {
-            // Create a new user if not found
-            user = new User({ mobileNumber });
-            await user.save();
+        // Check if user already exists
+        const existingUser = await User.findOne({ mobileNumber });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Generate JWT token
-        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
-
-        // Send response with token
-        res.status(200).json({ message: 'Logged in successfully', token });
+        // Generate OTP (you should integrate a real OTP sending logic here)
+        const otp = otpGenerator.generate(6, { digits: true, lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
+        // Save the new user
+        const newUser = new User({ name, mobileNumber, city, clinicName, speciality });
+        await newUser.save();  // Make sure the user is saved
+        console.log("User saved successfully");
+        // Send response with OTP (mock)
+        res.status(200).json({ message: 'OTP generated successfully', otp });
     } catch (err) {
         if (err instanceof z.ZodError) {
             return res.status(422).json({ errors: err.errors });
@@ -60,35 +33,28 @@ export const userLogin = async (req, res) => {
     }
 };
 
-// Edit User
-export const editUser = async (req, res) => {
+export const userLogin = async (req, res) => {
     try {
         // Validate input
-        editUserSchema.parse(req.body);
-        const { id } = req.params; // Get user ID from request params
-        const { name, city, clinicName, speciality } = req.body;
+        userLoginSchema.parse(req.body);
+        const { mobileNumber } = req.body;
 
-        // Find the user by ID
-        const user = await User.findById(id);
+        // Check if user exists
+        const user = await User.findOne({ mobileNumber });
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(400).json({ message: 'User not found' });
         }
 
-        // Update the user only if provided
-        user.name = name;
-        user.city = city;
-        user.clinicName = clinicName;
-        user.speciality = speciality;
-        await user.save();
-
-        res.status(200).json({ message: 'User updated successfully', user });
+        // Generate JWT token
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
+        res.status(200).json({ message: 'Logged in successfully', token });
     } catch (err) {
         if (err instanceof z.ZodError) {
             return res.status(422).json({ errors: err.errors });
         }
-        res.status(500).json({ error: err.message });   
+        res.status(500).json({ error: err.message });
     }
-}
+};
 
 
 export const adminLogin = async (req, res) => {
@@ -160,17 +126,6 @@ export const getUsers = async (req, res) => {
     }
 }
 
-// Get User
-export const getUser = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const user = await User.findById(id);
-        res.status(200).json(user);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
-
 export const editAdmin = async (req, res) => {
     try {
         // Validate input
@@ -208,3 +163,47 @@ export const editAdmin = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+// Edit User
+export const editUser = async (req, res) => {
+    try {
+        // Validate input
+        editUserSchema.parse(req.body);
+        const { id } = req.params; // Get user ID from request params
+        const { name, city, clinicName, speciality } = req.body;
+
+        // Find the user by ID
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Update the user only if provided
+        user.name = name;
+        user.city = city;
+        user.clinicName = clinicName;
+        user.speciality = speciality;
+        await user.save();
+
+        res.status(200).json({ message: 'User updated successfully', user });
+    } catch (err) {
+        if (err instanceof z.ZodError) {
+            return res.status(422).json({ errors: err.errors });
+        }
+        res.status(500).json({ error: err.message });   
+    }
+}
+
+// get user
+export const getUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ user });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}

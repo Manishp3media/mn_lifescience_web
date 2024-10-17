@@ -172,10 +172,10 @@ export const getAllProducts = async (req, res) => {
 
         res.status(200).json({ products });
     } catch (err) {
+        console.error("Error fetching products:", err.message);
         res.status(500).json({ error: err.message });
     }
 };
-
 
 // Get Products By Category
 export const getProductsByCategory = async (req, res) => {

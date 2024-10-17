@@ -30,12 +30,12 @@ const userSchema = new mongoose.Schema({
             message: 'Email is required for Admin'
         }
     },
-    otp: {
-        type: String,
-    },
-    password: {
-        type: String,
-    },
+    // otp: {
+    //     type: String,
+    // },
+    // password: {
+    //     type: String,
+    // },
     clinicName: {
         type: String
     },

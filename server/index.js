@@ -11,10 +11,13 @@ import socialMedialLinkRoutes from "./routes/socialMediaLink.js"
 import bannerRoutes from "./routes/banner.js";
 import logoRoutes from "./routes/logo.js";
 import termsRoutes from "./routes/terms.js";
+import authMiddleware from "./middleware/auth.js";
 
 dotenv.config(); // Load environment variables from .env file
 
 const app = express();
+
+const router = express.Router();
 
 // CORS configuration to allow all origins
 app.use(cors({
@@ -38,6 +41,12 @@ app.use("/api", bannerRoutes);
 app.use("/api", logoRoutes);
 app.use("/api", termsRoutes);
 
+// // Global error handler
+// app.use((err, req, res, next) => {
+//     logger.error('Unhandled error:', err);
+//     res.status(500).json({ error: 'An unexpected error occurred' });
+//   });
+
 app.get("/", (req, res) => {
     res.json({ message: "Hello World from backend"});
 })
@@ -48,6 +57,8 @@ mongoose
 }).then(() => {
     console.log("MongoDB connected successfully");
 }).catch((error) => console.log(`${error} did not connect`));
+
+
 
 // Server listening
 const PORT = process.env.PORT || 5000;
