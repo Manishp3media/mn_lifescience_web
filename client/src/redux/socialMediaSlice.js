@@ -70,7 +70,6 @@ export const updateSocialMediaLink = createAsyncThunk(
   }
 );
 
-
 const socialMediaLinkSlice = createSlice({
     name: "socialMediaLinkList",
     initialState: {
