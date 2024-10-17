@@ -130,7 +130,7 @@ export const deleteProductImage = async (req, res) => {
 // Edit Product
 export const editProduct = async (req, res) => {
     try {
-        const { id, name, description, category, composition, use, sku, tags } = req.body;
+        const { id, name, description, category, composition, sku, tags } = req.body;
 
         // Check if product exists
         const product = await Product.findById(id);
@@ -156,39 +156,38 @@ export const editProduct = async (req, res) => {
             product.category = category;
         }
 
-        // // Handle product image update (if provided)
-        // if (req.files && req.files["productImages"]) {
-        //     const newImage = req.files["productImage"][0].path;
+        // Handle product image update (if provided)
+        if (req.files && req.files["thumbnailImage"]) {
+            const newImage = req.files["thumbnailImage"][0].path;
 
-        //     // If the product already has an image, delete the old one from Cloudinary
-        //     if (product.productImage) {
-        //         const urlParts = product.productImage.split('/');
-        //         const folderAndFile = urlParts.slice(-2).join('/');
-        //         const publicId = folderAndFile.split('.')[0]; // Remove file extension
+            // If the product already has an image, delete the old one from Cloudinary
+            if (product.thumbnailImage) {
+                const urlParts = product.thumbnailImage.split('/');
+                const folderAndFile = urlParts.slice(-2).join('/');
+                const publicId = folderAndFile.split('.')[0]; // Remove file extension
 
-        //         try {
-        //             const deletionResult = await cloudinary.v2.uploader.destroy(publicId);
-        //             if (deletionResult.result === 'ok') {
-        //                 console.log(`Previous image deleted successfully from Cloudinary.`);
-        //             } else if (deletionResult.result === 'not found') {
-        //                 console.log(`Previous image not found in Cloudinary. It may have been deleted already.`);
-        //             } else {
-        //                 console.error(`Unexpected result from Cloudinary deletion:`, deletionResult);
-        //             }
-        //         } catch (cloudinaryError) {
-        //             console.error(`Error deleting old image from Cloudinary:`, cloudinaryError);
-        //         }
-        //     }
+                try {
+                    const deletionResult = await cloudinary.v2.uploader.destroy(publicId);
+                    if (deletionResult.result === 'ok') {
+                        console.log(`Previous image deleted successfully from Cloudinary.`);
+                    } else if (deletionResult.result === 'not found') {
+                        console.log(`Previous image not found in Cloudinary. It may have been deleted already.`);
+                    } else {
+                        console.error(`Unexpected result from Cloudinary deletion:`, deletionResult);
+                    }
+                } catch (cloudinaryError) {
+                    console.error(`Error deleting old image from Cloudinary:`, cloudinaryError);
+                }
+            }
 
-        //     // Update product image with the new image path
-        //     product.productImage = newImage;
-        // }
+            // Update product image with the new image path
+            product.thumbnailImage = newImage;
+        }
 
         // Update product fields only if the provided value is different from the current one
         if (name && name !== product.name) product.name = name;
         if (description && description !== product.description) product.description = description;
         if (composition && composition !== product.composition) product.composition = composition;
-        if (use && use !== product.use) product.use = use;
         if (tags && tags !== product.tags) product.tags = tags;
 
         // Save the updated product

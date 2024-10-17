@@ -61,7 +61,7 @@ export const getAllSocialMediaLinks = async (req, res) => {
 // Controller to edit an existing social media link
 export const editSocialMediaLink = async (req, res) => {
     try {
-        // Extract platform, URL, and additional fields from the request body
+         // Extract platform, URL, and additional fields from the request body
         const { id, platform, url, adminEmail, adminMobileNumber, whatsappNumber, instagram, facebook, twitter, linkedin } = req.body;
 
         // Find the existing social media link by ID

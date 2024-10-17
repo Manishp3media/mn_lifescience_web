@@ -155,6 +155,7 @@ export const getAllProducts = async (req, res) => {
                     use: 1,
                     sku: 1,
                     status: 1,
+                    thumbnailImage: 1,
                     productImages: 1,
                     tags: 1,
                     createdAt: 1, // Ensure createdAt is included
