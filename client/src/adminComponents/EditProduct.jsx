@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -15,16 +15,20 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { fetchCategories } from "@/redux/categorySlice";
+import { descriptionConfig, compositionConfig } from "./JoditConfig";
+import JoditEditor from 'jodit-react';
+import { useNavigate } from "react-router-dom";
 
-const EditProduct = () => {
+const EditProduct = ({ product, onSave  }) => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { categories } = useSelector((state) => state.categoryList);
     const [isUpdating, setIsUpdating] = useState(false);
     const {
         filteredProducts = [],
     } = useSelector(state => state.productList || {});
 
-    const product = filteredProducts;
+    // const product = filteredProducts;
 
     // Formik with initial values and Yup validation schema
     const formik = useFormik({
@@ -35,9 +39,8 @@ const EditProduct = () => {
             composition: product?.composition || "",
             sku: product?.sku || "",
             category: product?.category?._id || "",
-            tags: product?.tags ? product.tags.join(", ") : "",
-
-            // productImage: null,
+            tags: product?.tags,
+            thumbnailImage: null,
         },
         validationSchema: Yup.object({
             name: Yup.string().required("Product name is required"),
@@ -45,42 +48,40 @@ const EditProduct = () => {
             composition: Yup.string().required("Composition is required"),
             sku: Yup.string().required("SKU is required"),
             category: Yup.string().required("Please select a category"),
-            use: Yup.string().required("Use is required"),
-            tags: Yup.string().optional(),
-            // thumbNailImage: Yup.mixed().nullable(), // Allow null for editing
+            // use: Yup.string().required("Use is required"),
+
+            thumbnailImage: Yup.mixed().nullable(), // Allow null for editing
         }),
         onSubmit: async (values) => {
             setIsUpdating(true);
-            // const data = new FormData();
-            // for (const key in values) {
-            //     if (values[key] !== null && values[key] !== undefined) {
-            //         data.append(key, values[key]);
-            //         console.log(key, values[key]);
-            //     }
-            // }
+            const data = new FormData();
+            for (const key in values) {
+                if (values[key] !== null && values[key] !== undefined) {
+                    if (key === "thumbnailImage" && values.thumbnailImage instanceof File) {
+                        data.append(key, values.thumbnailImage);
+                    } else {
+                        data.append(key, values[key]);
+                    }
+                }
+            }
+            const updatedValues = {
+                ...values,
+                tags: values.tags,  // Replace the string with an array for submission
+            };
 
-            //         // Log before splitting the tags
-            //   console.log("Tags before splitting:", values.tags);
-
-            //         // Convert the comma-separated string to an array of tags
-            //         // const tagsArray = values.tags.split(",").map(tag => tag.trim());
-
-
-            //            // Log after splitting the tags
-            //   console.log("Tags after splitting:", tagsArray);
-            //         const updatedValues = {
-            //             ...values,
-            //             tags: values.tags,  // Replace the string with an array for submission
-            //         };
-
-
-            //   // Log the data being sent to the backend
-            //   console.log("Submitting updated values:", updatedValues);
+            // Log the data being sent to the backend
+            console.log("Submitting updated values:", updatedValues);
 
             try {
-                await dispatch(updateProduct(values)).unwrap();
+                await dispatch(updateProduct(data)).unwrap();
                 toast.success("Product updated successfully");
                 formik.resetForm();
+
+                 // Trigger the onSave callback to show the product list
+                 if (onSave) {
+                    onSave();
+                }
+               
                 // onClose();
             } catch (error) {
                 if (error.response && error.response.status === 400 && error.response.data.message.includes("SKU already exists")) {
@@ -100,9 +101,12 @@ const EditProduct = () => {
     };
 
     const handleFileChange = (e) => {
-        formik.setFieldValue("productImage", e.currentTarget.files[0]);
+        formik.setFieldValue("thumbnailImage", e.currentTarget.files[0]);
     };
 
+    // Text Editor Config
+    const descriptionEditorRef = useRef(null);
+    const compositionEditorRef = useRef(null);
 
     useEffect(() => {
         if (product) {
@@ -113,153 +117,165 @@ const EditProduct = () => {
                 composition: product?.composition,
                 sku: product?.sku,
                 category: product?.category?._id || "",
-                use: product?.use,
+                // use: product?.use,
                 tags: product?.tags || [],
             });
         }
     }, [product]);
 
     return (
-        <div>
-            <form onSubmit={formik.handleSubmit} className="space-y-4">
-                <div>
-                    <label className="block">Product Name</label>
-                    <Input
-                        name="name"
-                        value={formik.values.name}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        placeholder="Enter product name"
-                        required
-                    />
-                    {formik.touched.name && formik.errors.name && (
-                        <div className="text-red-500">{formik.errors.name}</div>
-                    )}
-                </div>
+        <div className="bg-gray-100">
+            <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
+                <form onSubmit={formik.handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-6">
+                    {/* Product Name */}
+                    <div>
+                       <label className="block text-sm font-medium text-gray-700 pb-2">Product Name</label>
+                        <Input
+                            name="name"
+                            value={formik.values.name}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            placeholder="Enter product name"
+                            required
+                        />
+                        {formik.touched.name && formik.errors.name && (
+                            <div className="text-red-500">{formik.errors.name}</div>
+                        )}
+                    </div>
 
-                {/* Category Selection */}
-                <div>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline">
-                                {categories.find(cat => cat._id === formik.values.category)?.name || "Select Category"}
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            {categories?.map((category) => (
-                                <DropdownMenuItem
-                                    key={category._id}
-                                    onClick={() => handleCategorySelect(category._id, category.name)}
-                                >
-                                    {category.name}
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    {formik.touched.category && formik.errors.category && (
-                        <div className="text-red-500">{formik.errors.category}</div>
-                    )}
-                </div>
-
-                <div>
-                    <label className="block">Description</label>
-                    <Input
-                        name="description"
-                        value={formik.values.description}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        placeholder="Enter product description"
-                        required
-                    />
-                    {formik.touched.description && formik.errors.description && (
-                        <div className="text-red-500">{formik.errors.description}</div>
-                    )}
-                </div>
-
-                <div>
-                    <label className="block">Composition</label>
-                    <Input
-                        name="composition"
-                        value={formik.values.composition}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        placeholder="Enter composition"
-                        required
-                    />
-                    {formik.touched.composition && formik.errors.composition && (
-                        <div className="text-red-500">{formik.errors.composition}</div>
-                    )}
-                </div>
-
-                <div>
-                    <label className="block">SKU</label>
-                    <Input
-                        name="sku"
-                        value={formik.values.sku}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        placeholder="Enter SKU"
-                        required
-                    />
-                    {formik.touched.sku && formik.errors.sku && (
-                        <div className="text-red-500">{formik.errors.sku}</div>
-                    )}
-                </div>
-
-                <div>
-                    <label className="block">use</label>
-                    <Input
-                        name="use"
-                        value={formik.values.use}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        placeholder="Enter use"
-                        required
-                    />
-                    {formik.touched.use && formik.errors.use && (
-                        <div className="text-red-500">{formik.errors.use}</div>
-                    )}
-                </div>
-
-                <div>
-                    <label className="block">tags</label>
-                    <Input
-                        name="tags"
-                        value={formik.values.tags}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        placeholder="Enter tags"
-                        required
-                    />
-                    {formik.touched.tags && formik.errors.tags && (
-                        <div className="text-red-500">{formik.errors.tags}</div>
-                    )}
-                </div>
-
-                {/* <div>
-                        <label className="block">Product Image</label>
+                    {/* Thumbnail Image */}
+                    <div>
+                       <label className="block text-sm font-medium text-gray-700 pb-2">Thumbnail Image</label>
                         <Input
                             type="file"
-                            name="productImage"
+                            name="thumbnailImage"
                             onChange={handleFileChange}
                             className="input"
                         />
-                        {formik.touched.productImage && formik.errors.productImage && (
-                            <div className="text-red-500">{formik.errors.productImage}</div>
+                        {formik.touched.thumbnailImage && formik.errors.thumbnailImage && (
+                            <div className="text-red-500">{formik.errors.thumbnailImage}</div>
                         )}
-                    </div> */}
+                    </div>
 
-                <DialogFooter>
-                    <Button type="submit" className="bg-[#386D62] hover:bg-[#386D62]" disabled={isUpdating}>
-                        {isUpdating ? <CustomSpinner size={20} /> : "Update"}
-                    </Button>
-                    {/* <Button className="hover:bg-red-500" onClick={onClose}>
-                        Cancel
-                    </Button> */}
-                </DialogFooter>
-            </form>
+                    {/* SKU */}
+                    <div>
+                    <label className="block text-sm font-medium text-gray-700 pb-2">SKU</label>
+                        <Input
+                            name="sku"
+                            value={formik.values.sku}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            placeholder="Enter SKU"
+                            required
+                        />
+                        {formik.touched.sku && formik.errors.sku && (
+                            <div className="text-red-500">{formik.errors.sku}</div>
+                        )}
+                    </div>
+
+                    {/* Category Selection */}
+                    <div>
+                    <label className="block text-sm font-medium text-gray-700 pb-2">Category</label>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild className="w-full">
+                                <Button variant="outline">
+                                    {categories.find(cat => cat._id === formik.values.category)?.name || "Select Category"}
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                {categories?.map((category) => (
+                                    <DropdownMenuItem
+                                        key={category._id}
+                                        onClick={() => handleCategorySelect(category._id, category.name)}
+                                    >
+                                        {category.name}
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        {formik.touched.category && formik.errors.category && (
+                            <div className="text-red-500">{formik.errors.category}</div>
+                        )}
+                    </div>
+                    </div>
+
+                    {/* Description */}
+                    <div className="flex flex-col items-center">
+                    <div className="max-w-4xl w-full mt-6">
+                    <label className="block text-sm font-medium text-gray-700 pb-2">Description</label>
+                        <JoditEditor
+                            ref={descriptionEditorRef}
+                            value={formik.values.description}
+                            config={descriptionConfig}
+                            tabIndex={2}
+                            onBlur={newContent => formik.setFieldValue('description', newContent)}
+                        />
+                        {formik.touched.description && formik.errors.description && (
+                            <div className="text-red-500">{formik.errors.description}</div>
+                        )}
+                    </div>
+
+                    {/* Composition */}
+                    <div className="max-w-4xl w-full mt-6">
+                    <label className="block text-sm font-medium text-gray-700 pb-2">Composition</label>
+                        <JoditEditor
+                            ref={compositionEditorRef}
+                            value={formik.values.composition}
+                            config={compositionConfig}
+                            tabIndex={2}
+                            onBlur={newContent => formik.setFieldValue('composition', newContent)}
+                        />
+                        {formik.touched.composition && formik.errors.composition && (
+                            <div className="text-red-500">{formik.errors.composition}</div>
+                        )}
+                    </div>
+                    </div>
+
+                    {/* Tags */}
+                    <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-700 pb-2">Tags</label>
+                        <Input
+                            name="tags"
+                            value={formik.values.tags}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            placeholder="Enter tags"
+                            required
+                        />
+                        {formik.touched.tags && formik.errors.tags && (
+                            <div className="text-red-500">{formik.errors.tags}</div>
+                        )}
+                    </div>
+
+                    <DialogFooter>
+                        <Button type="submit" className="bg-[#386D62] hover:bg-[#386D62]" disabled={isUpdating}>
+                            {isUpdating ? <CustomSpinner size={20} /> : "Update"}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </div>
         </div>
     );
 };
 
 export default EditProduct;
+
+
+
+
+
+// <div>
+//                     <label className="block">use</label>
+//                     <Input
+//                         name="use"
+//                         value={formik.values.use}
+//                         onChange={formik.handleChange}
+//                         onBlur={formik.handleBlur}
+//                         placeholder="Enter use"
+//                         required
+//                     />
+//                     {formik.touched.use && formik.errors.use && (
+//                         <div className="text-red-500">{formik.errors.use}</div>
+//                     )}
+//                 </div>

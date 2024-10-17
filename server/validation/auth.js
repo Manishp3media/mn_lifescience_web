@@ -27,3 +27,10 @@ export const editAdminSchema = z.object({
     newPassword: z.string().min(4, "Password must be at least 4 characters long").optional(),
     confirmPassword: z.string().optional(),
 });
+
+export const editUserSchema = z.object({
+    name: z.string().min(1, "Name is required").optional(),
+    city: z.string().min(1, "City is required").optional(),
+    clinicName: z.string().min(1, "Clinic name is required").optional(),
+    speciality: z.string().min(1, "Speciality is required").optional(),
+});

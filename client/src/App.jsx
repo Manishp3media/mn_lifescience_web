@@ -13,7 +13,6 @@ import AdminOptions from "./adminPages/AdminOptions";
 import TermsAndConditions from "./adminPages/TermsAndConditions";
 import ChangeCredentials from "./adminComponents/ChangeCredentials";
 import CreateProduct from "./adminComponents/CreateProduct";
-import EditProduct from "./adminComponents/EditProduct";
 
 const DashboardLayout = () => {
   return (
@@ -29,7 +28,6 @@ const DashboardLayout = () => {
           <Route path="/termsandconditions" element={<TermsAndConditions />} />
           <Route path="/change-credentials" element={<ChangeCredentials />} />
           <Route path="/add/product" element={<CreateProduct />} />
-          <Route path="/edit/product" element={<EditProduct />} />
           {/* Add more routes for other dashboard pages here */}
         </Routes>
       </div>
