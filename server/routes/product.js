@@ -6,7 +6,7 @@ import { deleteProduct, editProduct, deleteProductImage } from "../utils/cloudin
 
 const router = express.Router(); 
 
-// Create Product
+// Create Product Product
 router.post("/admin/create/product",authMiddleware('admin'),  uploadProductImage, createProduct);
 
 // Get All Products in Admin
