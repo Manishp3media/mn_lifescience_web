@@ -3,13 +3,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchTerms, updateTerms } from "@/redux/termsSlice";
 import JoditEditor from 'jodit-react';
 import UsersAndTersmsNavbar from "@/adminComponents/UsersNavbar";
+import { Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 const TermsAndConditions = () => {
     const dispatch = useDispatch();
     const editor = useRef(null);
     const { content, loading } = useSelector((state) => state.terms);
     const [termsContent, setTermsContent] = useState(content);
-    const [termsLoading, setTermsLoading] = useState(true);
+    const [termsLoading, setTermsLoading] = useState(false);
 
     useEffect(() => {
         dispatch(fetchTerms());
@@ -19,8 +21,17 @@ const TermsAndConditions = () => {
         setTermsContent(content);
     }, [content]);
 
-    const handleSave = () => {
-        dispatch(updateTerms(termsContent));
+    const handleSave = async () => {
+        try {
+            setTermsLoading(true);
+            await dispatch(updateTerms(termsContent)).unwrap();
+            toast.success('Terms and Conditions updated successfully');
+        } catch (err) {
+            toast.error('Failed to update Terms and Conditions');
+        } finally {
+            setTermsLoading(false);
+        }
+      
     };
 
     
@@ -40,7 +51,9 @@ const TermsAndConditions = () => {
                     <JoditEditor
                         ref={editor}
                         value={termsContent}
-                       
+                        config={{
+                            placeholder: "" // Set the placeholder to an empty string
+                        }}
                         tabIndex={1}
                         onBlur={newContent => setTermsContent(newContent)}
                         onChange={newContent => {}}
@@ -49,7 +62,7 @@ const TermsAndConditions = () => {
                     <div className="text-right">
                     <button onClick={handleSave} 
                                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                        Save
+                        {termsLoading ? <Loader2 className="animate-spin h-5 w-5" /> : "Save"}
                     </button>
                     </div>
                 </>

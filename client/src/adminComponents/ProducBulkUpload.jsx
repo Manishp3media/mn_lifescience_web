@@ -58,11 +58,11 @@ const ProductBulkUploadDialog = ({ isBulkOpen, onBulkClose }) => {
           </Button>
         </div>
 
-        <DialogFooter>
+        {/* <DialogFooter>
           <Button variant="outline" onClick={onBulkClose}>
             Cancel
           </Button>
-        </DialogFooter>
+        </DialogFooter> */}
       </DialogContent>
     </Dialog>
   );

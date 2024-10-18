@@ -195,7 +195,7 @@ export const editUser = async (req, res) => {
 
         // Update the user only if provided
         user.name = name;
-        user.city = city;
+        user.city = city.toLowerCase();
         user.clinicName = clinicName;
         user.speciality = speciality;
         await user.save();

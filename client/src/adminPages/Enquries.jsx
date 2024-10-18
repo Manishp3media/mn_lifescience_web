@@ -29,6 +29,8 @@ const Enquiries = () => {
         dispatch(fetchEnquiries());
     }, [dispatch]);
 
+    console.log(enquiries);
+
     const filteredEnquiries = useMemo(() => {
         return enquiries.filter(enquiry => {
             const enquiryDate = moment(enquiry.createdAt).startOf('day');

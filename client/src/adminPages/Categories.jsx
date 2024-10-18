@@ -42,7 +42,7 @@ const Categories = () => {
                                 </TableCell>
                                 <TableCell>
                                     <Dialog>
-                                        <DialogTrigger>View Logo</DialogTrigger>
+                                        <DialogTrigger className="cursor-pointer text-blue-600">View Logo</DialogTrigger>
                                         <DialogContent>
                                             {category?.categoryLogo ? <img src={category?.categoryLogo} alt="logo" /> : <p>No logo available</p>}
                                         </DialogContent>
