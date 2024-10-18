@@ -5,7 +5,7 @@ import categorySlice from "../redux/categorySlice";
 import enquiryListSlice from "../redux/enquiriesSlice";
 import usersSlice from "../redux/usersSlice";
 import bannerSlice from "../redux/bannerSlice";
-import socialMediaLinkSlice from "../redux/socialMediaSlice";
+import socialMediaLinkSlice from "../redux/socialMediaSlice"; 
 import logoSlice from "../redux/logoSlice";
 import termsSlice from "../redux/termsSlice";
 
@@ -17,7 +17,7 @@ const store = configureStore({
     enquiryList: enquiryListSlice,
     usersList: usersSlice,
     bannerList: bannerSlice,
-    sociaLMediaLink: socialMediaLinkSlice,
+    socialMediaLink: socialMediaLinkSlice, 
     logo: logoSlice,
     terms: termsSlice
   },

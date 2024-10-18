@@ -1,34 +1,38 @@
-import React from "react";
-import { useDispatch } from "react-redux";
-import { addSocialMediaLink } from "@/redux/socialMediaSlice";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { addSocialMediaLink, fetchSocialMediaLinks } from "@/redux/socialMediaSlice";
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog"; // Adjust the import path as needed
+} from "@/components/ui/dialog";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
-import { Input } from "@/components/ui/input"; // shadcn Input component
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { Loader2 } from "lucide-react"; // Import the loader icon
 
 const AddSocialMediaLink = ({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) => {
     const dispatch = useDispatch();
+    const { socialMediaLinks, fetchLoading, addLoading } = useSelector((state) => state.socialMediaLink);
 
-    // Formik setup
+    useEffect(() => {
+        dispatch(fetchSocialMediaLinks());
+    }, [dispatch]);
+
+    // Initialize formik after data is loaded
     const formik = useFormik({
+        enableReinitialize: true, // This will reinitialize the form when initialValues change
         initialValues: {
-            adminEmail: "",
-            adminMobileNumber: "",
-            whatsappNumber: "",
-            instagram: "",
-            facebook: "",
-            twitter: "",
-            linkedin: "",
-            // platform: "",
-            // link: "",
+            adminEmail: socialMediaLinks?.[0]?.adminEmail || "",
+            adminMobileNumber: socialMediaLinks?.[0]?.adminMobileNumber || "",
+            whatsappNumber: socialMediaLinks?.[0]?.whatsappNumber || "",
+            instagram: socialMediaLinks?.[0]?.instagram || "",
+            facebook: socialMediaLinks?.[0]?.facebook || "",
+            twitter: socialMediaLinks?.[0]?.twitter || "",
+            linkedin: socialMediaLinks?.[0]?.linkedin || "",
         },
         validationSchema: Yup.object({
             adminEmail: Yup.string().email("Invalid email format").optional(),
@@ -38,8 +42,6 @@ const AddSocialMediaLink = ({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) =
             facebook: Yup.string().optional(),
             twitter: Yup.string().optional(),
             linkedin: Yup.string().optional(),
-            // platform: Yup.string().optional(),
-            // link: Yup.string().optional(),
         }),
         onSubmit: async (values) => {
             const formData = new FormData();
@@ -59,6 +61,19 @@ const AddSocialMediaLink = ({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) =
             }
         },
     });
+
+    if (fetchLoading) {
+        return (
+            <Dialog open={isSocialMediaLinkOpen} onOpenChange={onSocialMediaLinkClose}>
+                <DialogContent>
+                    <div className="flex items-center justify-center min-h-[200px]">
+                        <Loader2 className="h-8 w-8 animate-spin" />
+                        <span className="ml-2">Loading social media details...</span>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        );
+    }
 
     return (
         <Dialog open={isSocialMediaLinkOpen} onOpenChange={onSocialMediaLinkClose}>
@@ -143,7 +158,6 @@ const AddSocialMediaLink = ({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) =
                         />
                     </div>
 
-                    {/* Two fields in one row */}
                     <div className="flex gap-4 mb-4">
                         <div className="w-1/2">
                             <label htmlFor="twitter" className="block text-sm font-medium">Twitter</label>
@@ -171,45 +185,23 @@ const AddSocialMediaLink = ({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) =
                         </div>
                     </div>
 
-                    {/* <Accordion type="single" collapsible className="mb-4">
-                        <AccordionItem value="platform">
-                            <AccordionTrigger>Add More</AccordionTrigger>
-                            <AccordionContent>
-                                <div className="mb-4">
-                                    <label htmlFor="platform" className="block text-sm font-medium">Platform</label>
-                                    <Input
-                                        id="platform"
-                                        name="platform"
-                                        type="text"
-                                        value={formik.values.platform}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        className="input"
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label htmlFor="link" className="block text-sm font-medium">Link</label>
-                                    <Input
-                                        id="url"
-                                        name="url"
-                                        type="text"
-                                        value={formik.values.url}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        className="input"
-                                    />
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
-                    </Accordion> */}
-
-                    <Button type="submit" className="btn">
-                        Add
+                    <Button 
+                        type="submit" 
+                        className="btn w-full"
+                        disabled={addLoading}
+                    >
+                        {addLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Adding...
+                            </>
+                        ) : (
+                            "Add"
+                        )}
                     </Button>
                 </form>
             </DialogContent>
         </Dialog>
-
     );
 };
 
