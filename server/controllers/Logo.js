@@ -41,9 +41,6 @@ export const editLogo = async (req, res) => {
         if (req.files && req.files["logoImage"] && req.files["logoImage"].length > 0) {
             const logoImage = req.files["logoImage"][0].path;
 
-            // Save the new logo path
-            logo.logoImage = logoImage;
-
             // Deletion of old image logic
             if (logo.logoImage) {
                 const urlParts = logo.logoImage.split('/');
@@ -64,6 +61,9 @@ export const editLogo = async (req, res) => {
                     return res.status(500).json({ message: "Error deleting old image from Cloudinary" });
                 }
             }
+
+                // Save the new logo path
+                logo.logoImage = logoImage;
         } else {
             return res.status(400).json({ message: "Logo image is required" });
         }

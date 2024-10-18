@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 const AddBanner = ({ isOpen, onClose }) => {
     const [bannerImage, setBannerImage] = useState(null);
     const dispatch = useDispatch();
-    const { loading } = useSelector((state) => state.bannerList); // Get loading state from Redux store
+    const [loading , setLoading] = useState(false);
 
     const handleImageChange = (event) => {
         const file = event.target.files[0];
@@ -22,16 +22,17 @@ const AddBanner = ({ isOpen, onClose }) => {
         (event) => {
             event.preventDefault();
             console.log("Form submitted");
-
+    
             if (!bannerImage) {
                 console.error("No image selected.");
                 toast.error("Please select an image before uploading.");
                 return;
             }
-
+    
             const formData = new FormData();
             formData.append("bannerImage", bannerImage);
-
+    
+            setLoading(true);
             // Dispatch the createBanner action
             dispatch(createBanner(formData))
                 .unwrap() // Ensure we can handle promise resolution properly
@@ -42,10 +43,14 @@ const AddBanner = ({ isOpen, onClose }) => {
                 .catch((error) => {
                     console.error("Error uploading banner:", error);
                     toast.error("Failed to upload banner.");
+                })
+                .finally(() => {
+                    setLoading(false);
                 });
         },
         [dispatch, bannerImage, onClose]
     );
+    
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>

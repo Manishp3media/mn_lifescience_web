@@ -2,29 +2,35 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import AdminOptionsNavbar from "@/adminComponents/AdminOptionsNavbar";
 import { getAllBanners, deleteBanner } from "@/redux/bannerSlice";
-import { Trash2 } from "lucide-react";
-import CustomSpinner from "@/adminComponents/CustomSpinner";
+import { Trash2, Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 const AdminOptions = () => {
     const dispatch = useDispatch();
-    const { banners, loading } = useSelector((state) => state.bannerList);
+    const { banners } = useSelector((state) => state.bannerList);
     const [currentSlide, setCurrentSlide] = useState(0);
     const [deleting, setDeleting] = useState(false);
-
 
     useEffect(() => {
         dispatch(getAllBanners());
     }, [dispatch]);
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         setDeleting(true);
-        dispatch(deleteBanner(id)).then(() => {
+        try {
+            await dispatch(deleteBanner(id)).unwrap();
+            // Ensure currentSlide is updated correctly after deletion
             if (currentSlide >= banners.length - 1) {
                 setCurrentSlide(Math.max(0, banners.length - 2));
             }
-        });
-        setDeleting(false);
-    }
+            toast.success("Banner deleted successfully");
+        } catch (error) {
+            const errorMessage = error?.error || error?.message || "Failed to create product";
+            toast.error(errorMessage);
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     return (
         <div className="container mx-auto px-4">
@@ -40,7 +46,7 @@ const AdminOptions = () => {
                                 className="text-red-500 hover:text-red-700"
                                 title="Delete banner"
                             >
-                             {deleting ? <CustomSpinner size={20} /> :   <Trash2 size={20} />}
+                                {deleting ? <Loader2 className="animate-spin" w-4 h-4 /> : <Trash2 size={20} />}
                             </button>
                         </div>
                         <img

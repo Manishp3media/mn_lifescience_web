@@ -11,4 +11,7 @@ router.patch("/admin/edit/logo",authMiddleware('admin'), uploadLogoImage, editLo
 // Get Logo
 router.get("/admin/get/logo",authMiddleware('admin'), getLogo);
 
+// Get Logo user side
+router.get("/user/get/logo",authMiddleware('user'), getLogo);
+
 export default router;

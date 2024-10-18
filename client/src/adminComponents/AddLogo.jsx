@@ -67,7 +67,7 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
         <Dialog open={isAddLogoOpen} onOpenChange={onLogoClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Add Logo</DialogTitle>
+                    <DialogTitle>Update Logo</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
                     <div className="space-y-4">
@@ -76,7 +76,7 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
                     </div>
                     <DialogFooter className="mt-4">
                         <Button type="submit" disabled={uploadLoading}>
-                            {uploadLoading ? <CustomSpinner /> : "Upload"}
+                            {uploadLoading ? <CustomSpinner /> : "Update"}
                         </Button>
                         <Button type="button" variant="secondary" onClick={onLogoClose}>
                             Cancel

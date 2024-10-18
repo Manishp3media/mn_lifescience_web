@@ -58,7 +58,9 @@ export const deleteBanner = createAsyncThunk(
       );
       return response.data.id;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue({
+        error: error.response?.data?.message || "Failed to create product"
+      });
     }
   }
 );
