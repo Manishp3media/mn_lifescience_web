@@ -27,8 +27,8 @@ const AddSocialMediaLink = ({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) =
             facebook: "",
             twitter: "",
             linkedin: "",
-            platform: "",
-            link: "",
+            // platform: "",
+            // link: "",
         },
         validationSchema: Yup.object({
             adminEmail: Yup.string().email("Invalid email format").optional(),
@@ -38,8 +38,8 @@ const AddSocialMediaLink = ({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) =
             facebook: Yup.string().optional(),
             twitter: Yup.string().optional(),
             linkedin: Yup.string().optional(),
-            platform: Yup.string().optional(),
-            link: Yup.string().optional(),
+            // platform: Yup.string().optional(),
+            // link: Yup.string().optional(),
         }),
         onSubmit: async (values) => {
             const formData = new FormData();
@@ -52,7 +52,7 @@ const AddSocialMediaLink = ({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) =
                 toast.success("Social media link added successfully");
                 formik.resetForm();
             } catch (error) {
-                toast.error("Failed to add social media link");
+                toast.error(error || "Failed to add social media link");
                 console.error("Error:", error);
             } finally {
                 onSocialMediaLinkClose();
@@ -171,7 +171,7 @@ const AddSocialMediaLink = ({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) =
                         </div>
                     </div>
 
-                    <Accordion type="single" collapsible className="mb-4">
+                    {/* <Accordion type="single" collapsible className="mb-4">
                         <AccordionItem value="platform">
                             <AccordionTrigger>Add More</AccordionTrigger>
                             <AccordionContent>
@@ -201,7 +201,7 @@ const AddSocialMediaLink = ({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) =
                                 </div>
                             </AccordionContent>
                         </AccordionItem>
-                    </Accordion>
+                    </Accordion> */}
 
                     <Button type="submit" className="btn">
                         Add
