@@ -1,82 +1,79 @@
 import {SocialMediaLink} from "../models/SocialMediaLink.js";
 
 export const addSocialMediaLink = async (req, res) => {
-    try {
-      // Extract platform, URL, and additional fields from the request body
-      const {
-        platform,
-        url,
-        adminEmail,
-        adminMobileNumber,
-        whatsappNumber,
-        instagram,
-        facebook,
-        twitter,
-        linkedin,
-      } = req.body;
-  
-      // Predefined platforms
-      const predefinedPlatforms = [
-        "facebook",
-        "instagram",
-        "twitter",
-        "linkedin",
-        "adminEmail",
-        "adminMobileNumber",
-        "whatsappNumber",
-      ];
-  
-      // Normalize platform to lowercase
-      const normalizedPlatform = platform ? platform.toLowerCase() : null;
-  
-      // Check if the platform is predefined and already exists
-      if (normalizedPlatform && predefinedPlatforms.includes(normalizedPlatform)) {
-        // Check if a social media link with the same platform already exists
-        const duplicateLink = await SocialMediaLink.findOne({ platform: normalizedPlatform });
-        if (duplicateLink) {
-          return res.status(400).json({
-            message: `Social media link for ${normalizedPlatform} already exists`,
-          });
-        }
-      }
-  
-      // Create a new social media link object
-      const newLink = new SocialMediaLink({
-        platform: normalizedPlatform,
-        url,
-        adminEmail,
-        adminMobileNumber,
-        whatsappNumber,
-        instagram,
-        facebook,
-        twitter,
-        linkedin,
-      });
-  
-      // Save the social media link to the database
-      const savedLink = await newLink.save();
-  
-      // Respond with success message and the saved link
-      res.status(201).json({
-        message: "Social media link added successfully",
-        data: savedLink,
-      });
-    } catch (error) {
-      // Handle duplicate key error (MongoDB error code 11000)
-      if (error.code === 11000) {
-        const field = Object.keys(error.keyValue)[0];
-        return res.status(400).json({
-          message: `Platform already exists.`,
-        });
-      }
-  
-      // Catch any other errors and respond
-      res.status(500).json({
-        message: "Failed to add social media link",
-        error: error.message,
+  try {
+    const {
+      platform,
+      url,
+      adminEmail,
+      adminMobileNumber,
+      whatsappNumber,
+      instagram,
+      facebook,
+      twitter,
+      linkedin,
+    } = req.body;
+
+    // Create an object with only non-empty fields
+    const fieldsToSave = {};
+    
+    // Only add fields that have values (not empty strings)
+    if (adminEmail) fieldsToSave.adminEmail = adminEmail;
+    if (adminMobileNumber) fieldsToSave.adminMobileNumber = adminMobileNumber;
+    if (whatsappNumber) fieldsToSave.whatsappNumber = whatsappNumber;
+    if (instagram) fieldsToSave.instagram = instagram;
+    if (facebook) fieldsToSave.facebook = facebook;
+    if (twitter) fieldsToSave.twitter = twitter;
+    if (linkedin) fieldsToSave.linkedin = linkedin;
+    if (platform) fieldsToSave.platform = platform.toLowerCase();
+    if (url) fieldsToSave.url = url;
+
+    // If there are no fields to save, return an error
+    if (Object.keys(fieldsToSave).length === 0) {
+      return res.status(400).json({
+        message: "No valid fields provided to save",
       });
     }
-  };
+
+    // Check for existing record
+    const existingRecord = await SocialMediaLink.findOne({});
+    
+    if (existingRecord) {
+      // Update only the provided fields
+      const updatedLink = await SocialMediaLink.findByIdAndUpdate(
+        existingRecord._id,
+        { $set: fieldsToSave },
+        { new: true }
+      );
+
+      return res.status(200).json({
+        message: "Social media links updated successfully",
+        data: updatedLink,
+      });
+    }
+
+    // If no existing record, create a new one
+    const newLink = new SocialMediaLink(fieldsToSave);
+    const savedLink = await newLink.save();
+
+    res.status(201).json({
+      message: "Social media link added successfully",
+      data: savedLink,
+    });
+
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({
+        message: "Platform already exists",
+      });
+    }
+
+    res.status(500).json({
+      message: "Error adding social media link",
+      error: error.message,
+    });
+  }
+};
 
 // Get all social media links
 export const getAllSocialMediaLinks = async (req, res) => {
