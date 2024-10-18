@@ -26,8 +26,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog"
-
+} from "@/components/ui/dialog";
 
 const Products = () => {
     const dispatch = useDispatch();
@@ -43,16 +42,36 @@ const Products = () => {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [laodingProductId, setLoadingProductId] = useState(null);
     const [addingImagesProductId, setAddingImagesProductId] = useState(null);
-
+    const [productsLoading, setProductsLoading] = useState(false);
     const handleSearch = (searchTerm) => {
         setSearchTerm(searchTerm);
     };
 
+   
+
     useEffect(() => {
-        dispatch(fetchProducts());
+        const loadProducts = async () => {
+            if (productsLoading) return; // Prevent multiple calls
+            setProductsLoading(true); // Set loading to true before fetching
+    
+            try {
+                await dispatch(fetchProducts());
+            } catch (error) {
+                console.error("Failed to fetch enquiries:", error);
+                // Optionally, you can set an error state here
+            } finally {
+                setProductsLoading(false); // Always set loading to false after fetching
+            }
+        };
+        
+        loadProducts();
     }, [dispatch]);
 
-    console.log(filteredProducts);
+    // useEffect(() => {
+    //     dispatch(fetchProducts());
+    // }, [dispatch]);
+
+    // console.log(filteredProducts);
 
     const filteredAndSearchedProducts = Array.isArray(filteredProducts)
         ? filteredProducts?.filter(product =>
@@ -116,6 +135,14 @@ const Products = () => {
         setOpenEditModal(false);
         setSelectedProduct(null);
     };
+
+    if (productsLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Loader2 className="animate-spin w-[60px] h-[200px]" />
+            </div>
+        );
+    }
 
 
     return (

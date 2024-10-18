@@ -10,9 +10,28 @@ const AdminOptions = () => {
     const { banners } = useSelector((state) => state.bannerList);
     const [currentSlide, setCurrentSlide] = useState(0);
     const [deleting, setDeleting] = useState(false);
+    const [bannersLoading, setBannersLoading] = useState(false);
+
+    // useEffect(() => {
+    //     dispatch(getAllBanners());
+    // }, [dispatch]);
 
     useEffect(() => {
-        dispatch(getAllBanners());
+        const loadBanners = async () => {
+            if (bannersLoading) return; // Prevent multiple calls
+            setBannersLoading(true); // Set loading to true before fetching
+    
+            try {
+                await dispatch(getAllBanners());
+            } catch (error) {
+                console.error("Failed to fetch enquiries:", error);
+                // Optionally, you can set an error state here
+            } finally {
+                setBannersLoading(false); // Always set loading to false after fetching
+            }
+        };
+        
+        loadBanners();
     }, [dispatch]);
 
     const handleDelete = async (id) => {
@@ -31,6 +50,14 @@ const AdminOptions = () => {
             setDeleting(false);
         }
     };
+
+    if (bannersLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Loader2 className="animate-spin w-[60px] h-[200px]" />
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto px-4">

@@ -12,6 +12,7 @@ import {
 import moment from "moment";
 import EnquiriesNavbar from "@/adminComponents/EnquiriesNavbar";
 import EnquiryStatusDropdown from "@/adminComponents/EnquiryStatusDropdown";
+import { Loader2 } from "lucide-react";
 
 const Enquiries = () => {
     const dispatch = useDispatch();
@@ -24,10 +25,26 @@ const Enquiries = () => {
         status,
         error
     } = useSelector(state => state.enquiryList);
+    const [enquiriesLoading, setEnquiriesLoading] = useState(false);
 
     useEffect(() => {
-        dispatch(fetchEnquiries());
-    }, [dispatch]);
+        const loadEnquiries = async () => {
+            if (enquiriesLoading) return; // Prevent multiple calls
+            setEnquiriesLoading(true); // Set loading to true before fetching
+    
+            try {
+                await dispatch(fetchEnquiries());
+            } catch (error) {
+                console.error("Failed to fetch enquiries:", error);
+                // Optionally, you can set an error state here
+            } finally {
+                setEnquiriesLoading(false); // Always set loading to false after fetching
+            }
+        };
+        
+        loadEnquiries();
+    }, [dispatch]); // Add loading as a dependency if needed
+    
 
     console.log(enquiries);
 
@@ -49,13 +66,13 @@ const Enquiries = () => {
         });
     }, [enquiries, dateRange, selectedCity, selectedUser, selectedStatus]);
 
-    // if (status === 'loading') {
-    //     return <div>Loading...</div>;
-    // }
-
-    // if (status === 'failed') {
-    //     return <div>Error: {error}</div>;
-    // }
+    if (enquiriesLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Loader2 className="animate-spin w-[60px] h-[200px]" />
+            </div>
+        );
+    }
 
     return (
         <div>

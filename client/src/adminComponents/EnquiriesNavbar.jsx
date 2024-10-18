@@ -213,7 +213,7 @@ const EnquiriesNavbar = () => {
                     )}
                     {selectedCity && (
                         <Badge variant="secondary" className="bg-blue-200 text-blue-800 flex items-center">
-                            Category: {selectedCity}
+                            City: {selectedCity}
                             <Button variant="ghost" size="sm" onClick={() => clearFilter('city')} className="ml-1 p-0">
                                 <X className="h-4 w-4" />
                             </Button>

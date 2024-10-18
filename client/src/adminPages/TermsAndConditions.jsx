@@ -9,13 +9,32 @@ import { toast } from "react-toastify";
 const TermsAndConditions = () => {
     const dispatch = useDispatch();
     const editor = useRef(null);
-    const { content, loading } = useSelector((state) => state.terms);
+    const { content } = useSelector((state) => state.terms);
     const [termsContent, setTermsContent] = useState(content);
     const [termsLoading, setTermsLoading] = useState(false);
+    const [loadingTerms, setLoadingTerms] = useState(false);
 
+    // useEffect(() => {
+    //     dispatch(fetchTerms());
+    // }, [dispatch]);
+    
     useEffect(() => {
-        dispatch(fetchTerms());
-    }, [dispatch]);
+        const loadTerms = async () => {
+            if (loadingTerms) return; // Prevent multiple calls
+            setLoadingTerms(true); // Set loading to true before fetching
+    
+            try {
+                await dispatch(fetchTerms());
+            } catch (error) {
+                console.error("Failed to fetch enquiries:", error);
+                // Optionally, you can set an error state here
+            } finally {
+                setLoadingTerms(false); // Always set loading to false after fetching
+            }
+        };
+        
+        loadTerms();
+    }, [dispatch]); // Add loading as a dependency if needed
 
     useEffect(() => {
         setTermsContent(content);
@@ -31,9 +50,15 @@ const TermsAndConditions = () => {
         } finally {
             setTermsLoading(false);
         }
-      
     };
 
+    if (loadingTerms) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Loader2 className="animate-spin w-[60px] h-[200px]" />
+            </div>
+        );
+    }
     
     return (
         <div>
@@ -42,9 +67,7 @@ const TermsAndConditions = () => {
         <div className="min-h-screen bg-gray-100 p-6">
             
             <div className="max-w-4xl mx-auto mt-6 p-6 bg-white rounded-lg shadow-lg">
-            {loading ? (
-                        <div>Loading terms...</div>
-                    ) : (
+           
           
                 <>
                  <div className="mb-4">
@@ -66,7 +89,7 @@ const TermsAndConditions = () => {
                     </button>
                     </div>
                 </>
-            )}
+      
             </div>
         </div>
         </div>

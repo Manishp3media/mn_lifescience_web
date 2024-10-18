@@ -1,5 +1,5 @@
 import React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AdminNavbar from "@/adminComponents/AdminNavbar";
 import {
@@ -13,22 +13,43 @@ import {
 import { fetchUsers } from "@/redux/usersSlice";
 import moment from "moment";
 import UsersAndTersmsNavbar from "@/adminComponents/UsersNavbar";
+import { Loader2 } from "lucide-react";
 
 const Users = () => {
     const dispatch = useDispatch();
-    const { users, status, error } = useSelector((state) => state.usersList);
+    const { users } = useSelector((state) => state.usersList);
+    const [usersLoading, setUsersLoading] = useState(false);
+
+    // useEffect(() => {
+    //     dispatch(fetchUsers());
+    // }, [dispatch]);
 
     useEffect(() => {
-        dispatch(fetchUsers());
-    }, [dispatch]);
+        const loadUsers = async () => {
+            if (usersLoading) return; // Prevent multiple calls
+            setUsersLoading(true); // Set loading to true before fetching
+    
+            try {
+                await dispatch(fetchUsers());
+            } catch (error) {
+                console.error("Failed to fetch enquiries:", error);
+                // Optionally, you can set an error state here
+            } finally {
+                setUsersLoading(false); // Always set loading to false after fetching
+            }
+        };
+        
+        loadUsers();
+    }, [dispatch]); // Add loading as a dependency if needed
 
-    // if (status === "loading") {
-    //     return <div>Loading...</div>;
-    // }
-
-    // if (status === "failed") {
-    //     return <div>Error: {error}</div>;
-    // }
+    if (usersLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Loader2 className="animate-spin w-[60px] h-[200px]" />
+            </div>
+        );
+    }
+    
 
     return (
         <div>
