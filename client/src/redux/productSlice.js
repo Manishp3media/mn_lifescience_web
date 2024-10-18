@@ -41,7 +41,9 @@ export const createProduct = createAsyncThunk(
       );
       return response.data.product;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Failed to create product");
+      return rejectWithValue({
+        error: error.response?.data?.message || "Failed to create product"
+      });
     }
   }
 );
@@ -306,9 +308,15 @@ const productListSlice = createSlice({
         state.bulkUploadStatus = "loading";
       })
       .addCase(bulkUploadProducts.fulfilled, (state, action) => {
-        state.bulkUploadStatus = "succeeded";
-        state.products = [...state.products, ...action.payload.products]; // Merge new products into the list
-        state.filteredProducts = filterProducts(state); // Reapply filtering
+        state.loading = false;
+        // Check if action.payload.products exists and is an array
+        // if (action.payload?.products && Array.isArray(action.payload.products)) {
+        //   // Use array spread to add new products at the beginning
+        //   state.products = [...action.payload.products, ...state.products];
+        // } else if (Array.isArray(action.payload)) {
+        //   // If payload is directly an array
+        //   state.products = [...action.payload, ...state.products];
+        // }
       })
       .addCase(bulkUploadProducts.rejected, (state, action) => {
         state.bulkUploadStatus = "failed";

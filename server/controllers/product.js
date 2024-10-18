@@ -80,13 +80,22 @@ export const bulkUploadProducts = async (req, res) => {
         const sheetName = workbook.SheetNames[0];
         const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
+         // Normalize the header names to lower case
+         const normalizedSheet = sheet.map(row => {
+            const normalizedRow = {};
+            for (const key in row) {
+                normalizedRow[key.toLowerCase()] = row[key]; // Normalize keys to lower case
+            }
+            return normalizedRow;
+        });
+
         const products = [];
-        for (const row of sheet) {
+        for (const row of normalizedSheet) {
             try {
                 // Validate each row using Zod schema
                 createProductSchema.parse(row);
 
-                const { name, description, category: categoryName, composition, use, sku, tags } = row;
+                const { name, description, category: categoryName, composition, sku, tags } = row;
 
                 // Check if SKU already exists
                 const existingProduct = await Product.findOne({ sku });
@@ -108,7 +117,6 @@ export const bulkUploadProducts = async (req, res) => {
                     description,
                     category: category._id,
                     composition,
-                    use,
                     sku,
                     tags
                 });

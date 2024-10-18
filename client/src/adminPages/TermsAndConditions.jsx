@@ -7,14 +7,13 @@ import UsersAndTersmsNavbar from "@/adminComponents/UsersNavbar";
 const TermsAndConditions = () => {
     const dispatch = useDispatch();
     const editor = useRef(null);
-    const { content, status, error } = useSelector((state) => state.terms);
+    const { content, loading } = useSelector((state) => state.terms);
     const [termsContent, setTermsContent] = useState(content);
+    const [termsLoading, setTermsLoading] = useState(true);
 
     useEffect(() => {
-        if (status === 'idle') {
-            dispatch(fetchTerms());
-        }
-    }, [status, dispatch]);
+        dispatch(fetchTerms());
+    }, [dispatch]);
 
     useEffect(() => {
         setTermsContent(content);
@@ -32,10 +31,10 @@ const TermsAndConditions = () => {
         <div className="min-h-screen bg-gray-100 p-6">
             
             <div className="max-w-4xl mx-auto mt-6 p-6 bg-white rounded-lg shadow-lg">
-
-            {status === 'loading' && <p>Loading...</p>}
-            {error && <p>Error: {error}</p>}
-            {status === 'succeeded' && (
+            {loading ? (
+                        <div>Loading terms...</div>
+                    ) : (
+          
                 <>
                  <div className="mb-4">
                     <JoditEditor

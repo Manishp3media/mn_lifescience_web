@@ -17,7 +17,9 @@ export const fetchCategories = createAsyncThunk(
         );
         return response.data.categories; 
       } catch (error) {
-        return rejectWithValue(error.response?.data || "Failed to fetch products");
+        return rejectWithValue({
+          error: error.response?.data?.message || "Failed to create category",
+        });
       }
     }
   );

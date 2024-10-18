@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { bulkUploadProducts } from "@/redux/productSlice";
+import { bulkUploadProducts, fetchProducts } from "@/redux/productSlice";
 import {Button} from "@/components/ui/button";
 import { toast } from "react-toastify";
 import CustomSpinner from "./CustomSpinner";
@@ -9,25 +9,35 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 const ProductBulkUploadDialog = ({ isBulkOpen, onBulkClose }) => {
   const [file, setFile] = useState(null);
   const dispatch = useDispatch();
-  const bulkUploadStatus = useSelector((state) => state.productList.bulkUploadStatus);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
 
-  const handleBulkUpload = () => {
-    if (file) {
-      dispatch(bulkUploadProducts(file))
-        .unwrap()
-        .then(() => {
-          toast.success("Bulk upload successful!");
-          onBulkClose(); // Close dialog on success
-        })
-        .catch((error) => {
-          toast.error(error || "Bulk upload failed");
-        });
+  const handleBulkUpload = async () => {
+    if (!file) {
+      toast.error("Please select a file first");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const resultAction = await dispatch(bulkUploadProducts(file));
+      if (bulkUploadProducts.fulfilled.match(resultAction)) {
+        // Fetch updated products list
+        await dispatch(fetchProducts());
+        toast.success("Bulk upload successful!");
+        setFile(null);
+        onBulkClose();
+      } else if (bulkUploadProducts.rejected.match(resultAction)) {
+        toast.error(resultAction.payload || "Bulk upload failed");
+      }
+    } catch (err) {
+      toast.error("Upload failed. Please try again.");
     }
   };
+
 
   return (
     <Dialog open={isBulkOpen} onOpenChange={onBulkClose}>
@@ -43,8 +53,8 @@ const ProductBulkUploadDialog = ({ isBulkOpen, onBulkClose }) => {
             accept=".xlsx, .xls"
             className="border p-2 w-full"
           />
-          <Button onClick={handleBulkUpload} disabled={bulkUploadStatus === "loading"}>
-            {bulkUploadStatus === "loading" ? <CustomSpinner /> : "Upload Excel"}
+          <Button onClick={handleBulkUpload}  disabled={isUploading || !file}>
+          {isUploading ? <CustomSpinner /> : "Upload Excel"}
           </Button>
         </div>
 

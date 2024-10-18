@@ -19,6 +19,15 @@ import UpdateProductStatus from "@/adminComponents/UpdateProductStatus";
 import { Input } from "@/components/ui/input";
 import ProductImagesPopup from "@/adminComponents/ProductImages";
 import { useNavigate } from "react-router-dom";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+
 
 const Products = () => {
     const dispatch = useDispatch();
@@ -101,7 +110,7 @@ const Products = () => {
         }
     }, [dispatch]);
 
-   
+
     const handleSave = () => {
         // Close the edit modal and reset the selected product after a successful update
         setOpenEditModal(false);
@@ -126,17 +135,15 @@ const Products = () => {
                                 <TableHead>Category</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>SKU</TableHead>
-                                <TableHead>Tags</TableHead>
+                                <TableHead>Thumbnail Image</TableHead>
                                 <TableHead>Image</TableHead>
+                                <TableHead>Tags</TableHead>
                                 <TableHead>Actions</TableHead>
-                               
                             </TableRow>
                         </TableHeader>
                         <TableBody >
                             {filteredAndSearchedProducts.map((product) => (
-
                                 <TableRow key={product?._id}>
-
                                     <TableCell>
                                         {product?.name}
                                     </TableCell>
@@ -152,9 +159,23 @@ const Products = () => {
                                     </TableCell>
 
                                     <TableCell>{product?.sku}</TableCell>
+
+                                    {/* Thumbnail Image */}
                                     <TableCell>
-                                         <Input className="w-[250px] h-[50px]" type="text" value={product?.tags} />
-                                        {/* {product?.tags} */}
+                                    <Dialog>
+                                        <DialogTrigger className="text-blue-700">View Image</DialogTrigger>
+                                        <DialogContent className="flex justify-center items-center"> {/* Centering the content */}
+                                            {product?.thumbnailImage ? (
+                                                <img
+                                                    src={product?.thumbnailImage}
+                                                    alt="Thumbnail"
+                                                    className="h-auto w-auto" // Fixed height with auto width
+                                                />
+                                            ) : (
+                                                <p>No thumbnail image</p>
+                                            )}
+                                        </DialogContent>
+                                    </Dialog>
                                     </TableCell>
 
                                     {/* Product Images */}
@@ -168,6 +189,10 @@ const Products = () => {
                                     </TableCell>
 
                                     <TableCell>
+                                        <Input className="w-[250px] h-[50px]" type="text" value={product?.tags} />
+                                    </TableCell>
+
+                                    <TableCell>
                                         {laodingProductId === product?._id ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
                                         ) : (
@@ -177,9 +202,7 @@ const Products = () => {
                                             />
                                         )}
                                     </TableCell>
-                                    
                                 </TableRow>
-
                             ))}
                         </TableBody>
                     </Table>

@@ -131,7 +131,7 @@ const CreateProduct = () => {
         setThumbnailImage(null);
         setSizeWarning("");
       } catch (error) {
-        const errorMessage = error?.message || "Failed to create product";
+        const errorMessage = error?.error || error?.message || "Failed to create product";
         toast.error(errorMessage);
       } finally {
         setIsCreating(false);

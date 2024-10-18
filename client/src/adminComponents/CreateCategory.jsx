@@ -44,12 +44,8 @@ const CreateCategory = ({ isOpen, onClose }) => {
               toast.success("Product created successfully");
               formik.resetForm();
             } catch (error) {
-                if (error.response && error.response.status === 400 && error.response.data.message.includes('Category already exists')) {
-                    formik.setFieldError("name", "Category already exists. Please use a different one.");
-                } else {
-                    toast.error("Failed to create category");
-                }
-                console.error("Error creating category:", error);
+                const errorMessage = error?.error || error?.message || "Failed to create product";
+                toast.error(errorMessage);
             } finally {
               setIsCreating(false);
               onClose();

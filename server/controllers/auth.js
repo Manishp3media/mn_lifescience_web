@@ -61,24 +61,37 @@ export const userLogin = async (req, res) => {
 
 export const adminLogin = async (req, res) => {
     try {
-        // Validate input
+        // Validate input using Zod schema
         adminLoginSchema.parse(req.body);
         const { email, password } = req.body;
 
-        // Check if admin exists
+        // Check if email and password are present
+        if (!email || !password) {
+            return res.status(400).send('Email and password are required');
+        }
+
+        // Find admin user by email
         const admin = await User.findOne({ email, role: 'admin' });
+
         if (!admin) {
             return res.status(400).send('Invalid credentials');
         }
 
+        // Check if admin has a valid password
+        if (!admin.password) {
+            return res.status(500).send('Admin password is missing or invalid');
+        }
+
         // Compare the entered password with the stored hashed password
         const isMatch = await bcrypt.compare(password, admin.password);
+
         if (!isMatch) {
             return res.status(400).send('Invalid credentials');
         }
 
         // Generate JWT token
         const token = jwt.sign({ id: admin._id, role: 'admin' }, process.env.JWT_SECRET);
+
         res.send({ token });
     } catch (err) {
         if (err instanceof z.ZodError) {
@@ -87,6 +100,7 @@ export const adminLogin = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
 
 export const createAdmin = async (req, res) => {
     try {
