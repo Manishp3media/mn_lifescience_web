@@ -1,52 +1,82 @@
 import {SocialMediaLink} from "../models/SocialMediaLink.js";
 
-// Controller to add a new social media link
 export const addSocialMediaLink = async (req, res) => {
     try {
-        // Extract platform, URL, and additional fields from the request body
-        const { platform, url, adminEmail, adminMobileNumber, whatsappNumber, instagram, facebook, twitter, linkedin } = req.body;
-
-        // Predefined platforms
-        const predefinedPlatforms = ["facebook", "instagram", "twitter", "linkedin"];
-        
-        // Normalize platform to lowercase
-        const normalizedPlatform = platform ? platform.toLowerCase() : null;
-
-        // Check if the platform is one of the predefined platforms
-        if (normalizedPlatform && predefinedPlatforms.includes(normalizedPlatform)) {
-            // Check if a social media link with the same platform already exists
-            const existingLink = await SocialMediaLink.findOne({ platform: normalizedPlatform });
-            if (existingLink) {
-                return res.status(400).json({ message: "Social media link for this predefined platform already exists" });
-            }
+      // Extract platform, URL, and additional fields from the request body
+      const {
+        platform,
+        url,
+        adminEmail,
+        adminMobileNumber,
+        whatsappNumber,
+        instagram,
+        facebook,
+        twitter,
+        linkedin,
+      } = req.body;
+  
+      // Predefined platforms
+      const predefinedPlatforms = [
+        "facebook",
+        "instagram",
+        "twitter",
+        "linkedin",
+        "adminEmail",
+        "adminMobileNumber",
+        "whatsappNumber",
+      ];
+  
+      // Normalize platform to lowercase
+      const normalizedPlatform = platform ? platform.toLowerCase() : null;
+  
+      // Check if the platform is predefined and already exists
+      if (normalizedPlatform && predefinedPlatforms.includes(normalizedPlatform)) {
+        // Check if a social media link with the same platform already exists
+        const duplicateLink = await SocialMediaLink.findOne({ platform: normalizedPlatform });
+        if (duplicateLink) {
+          return res.status(400).json({
+            message: `Social media link for ${normalizedPlatform} already exists`,
+          });
         }
-
-        // Create a new social media link object
-        const newLink = new SocialMediaLink({
-            platform: normalizedPlatform, // Store platform in lowercase for consistency
-            url: url || null, // Allow URL to be optional
-            adminEmail,
-            adminMobileNumber,
-            whatsappNumber,
-            instagram,
-            facebook,
-            twitter,
-            linkedin
-        });
-
-        // Save the social media link to the database
-        const savedLink = await newLink.save();
-
-        // Respond with success message and the saved link
-        res.status(201).json({
-            message: "Social media link added successfully",
-            data: savedLink,
-        });
+      }
+  
+      // Create a new social media link object
+      const newLink = new SocialMediaLink({
+        platform: normalizedPlatform,
+        url,
+        adminEmail,
+        adminMobileNumber,
+        whatsappNumber,
+        instagram,
+        facebook,
+        twitter,
+        linkedin,
+      });
+  
+      // Save the social media link to the database
+      const savedLink = await newLink.save();
+  
+      // Respond with success message and the saved link
+      res.status(201).json({
+        message: "Social media link added successfully",
+        data: savedLink,
+      });
     } catch (error) {
-        // Catch and respond with any errors
-        res.status(500).json({ message: "Failed to add social media link", error: error.message });
+      // Handle duplicate key error (MongoDB error code 11000)
+      if (error.code === 11000) {
+        const field = Object.keys(error.keyValue)[0];
+        return res.status(400).json({
+          message: `Platform already exists.`,
+        });
+      }
+  
+      // Catch any other errors and respond
+      res.status(500).json({
+        message: "Failed to add social media link",
+        error: error.message,
+      });
     }
-};
+  };
 
 // Get all social media links
 export const getAllSocialMediaLinks = async (req, res) => {

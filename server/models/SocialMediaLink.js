@@ -3,30 +3,38 @@ import mongoose from 'mongoose';
 const socialMediaLinkSchema = new mongoose.Schema({
     platform: {
         type: String,
+        unique: true,
     },
     url: {
         type: String,
     },
     adminEmail: {
         type: String,
+        unique: true,
     },
     adminMobileNumber: {
         type: String,
+        unique: true,
     },
     whatsappNumber: {
         type: String,
+        unique: true,
     },
     instagram:{
-        type: String
+        type: String,
+        unique: true,
     },
     facebook:{
-        type: String
+        type: String,
+        unique: true,
     },
     twitter:{
-        type: String
+        type: String,
+        unique: true,
     },
     linkedin:{
-        type: String
+        type: String,
+        unique: true,
     }
 }, {
     timestamps: true,
