@@ -11,7 +11,7 @@ import { set } from "date-fns";
 const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
     const [logoImage, setLogoImage] = useState(null);
     const dispatch = useDispatch();
-    const { logo, loading, error } = useSelector((state) => state.logo); // Get loading and error state from Redux store
+    const { logo } = useSelector((state) => state.logo); // Get loading and error state from Redux store
     const [uploadLoading, setUploadLoading] = useState(false);
 
     // Fetch the existing logo on component mount
@@ -42,7 +42,7 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
             try {
                 setUploadLoading(true);
                 if (logo[0]?.logoImage) {
-                   
+
                     // If logo exists, dispatch editLogo
                     formData.append("id", logo[0]._id); // Pass the existing logo ID for update
                     await dispatch(editLogo(formData)).unwrap();
@@ -67,16 +67,16 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
         <Dialog open={isAddLogoOpen} onOpenChange={onLogoClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Update Logo</DialogTitle>
+                    <DialogTitle>{logo[0]?.logoImage ? "Update Logo" : "Upload Logo"}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         <Input type="file" onChange={handleImageChange} accept="image/*" />
-                        {error && <p className="text-red-600">{error}</p>} {/* Show error message if exists */}
+                        {/* {error && <p className="text-red-600">{error}</p>} Show error message if exists */}
                     </div>
                     <DialogFooter className="mt-4">
                         <Button type="submit" disabled={uploadLoading}>
-                            {uploadLoading ? <CustomSpinner /> : "Update"}
+                            {uploadLoading ? <CustomSpinner /> : logo[0]?.logoImage ? "Update" : "Upload"}
                         </Button>
                         <Button type="button" variant="secondary" onClick={onLogoClose}>
                             Cancel

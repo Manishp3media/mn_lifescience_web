@@ -178,19 +178,21 @@ export const addProductImages = createAsyncThunk(
   "productList/addProductImages",
   async (formData, { rejectWithValue }) => {
     try {
+      console.log('addProductImages thunk: Sending request with formData:', formData);
       const token = localStorage.getItem("token");
       console.log("Token: ", token);
       const response = await axios.patch(
         "https://mn-life-catalogue.vercel.app/api/admin/add/product/images",
-       
+
         formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-             "Content-Type": "multipart/form-data"
+            "Content-Type": "multipart/form-data"
           },
         }
       );
+      console.log('addProductImages thunk: Response received:', response.data);
       return response.data;
     } catch (error) {
       console.log(error, "add product images error");
@@ -349,26 +351,59 @@ const productListSlice = createSlice({
         console.log('addProductImages: pending');
         state.addImageStatus = 'loading';
       })
+      //   .addCase(addProductImages.fulfilled, (state, action) => {
+      //     console.log('Redux: addProductImages fulfilled', action.payload);
+      //     state.addImageStatus = 'succeeded';
+
+      //     // Get the productId from the formData that was passed to the thunk
+      //     const productId = action.meta.arg.get('id');
+      //     const { productImages } = action.payload;
+
+      //     console.log('Redux: Updating images for product:', productId);
+      //     console.log('Redux: New images:', productImages);
+
+      //     // Update both products and filteredProducts arrays
+      //     const updateProductImages = (products) => {
+      //         if (!Array.isArray(products)) return;
+
+      //         const productIndex = products.findIndex(p => p._id === productId);
+      //         if (productIndex !== -1) {
+      //             // Append new images to existing ones
+      //             products[productIndex].productImages = [
+      //                 ...products[productIndex].productImages || [],
+      //                 ...productImages
+      //             ];
+      //             console.log('Redux: Updated product images. New count:', 
+      //                 products[productIndex].productImages.length);
+      //         }
+      //     };
+
+      //     if (state.products) updateProductImages(state.products);
+      //     if (state.filteredProducts) updateProductImages(state.filteredProducts);
+      // })
+      // In your reducer's extraReducers
       .addCase(addProductImages.fulfilled, (state, action) => {
-        console.log('addProductImages: fulfilled', action.payload);
         state.addImageStatus = 'succeeded';
-        const productId = action.meta.arg.productId; // Pass productId in your thunk argument
-        const updateProductImages = (productArray) => {
-          const index = productArray.findIndex((product) => product._id === productId);
-          if (index !== -1) {
-            // Update the productImages
-            productArray[index].productImages = productImages;
-          } else {
-            console.log(`Product with id ${productId} not found.`);
+
+        // Get the productId from the formData that was passed to the thunk
+        const productId = action.meta.arg.get('id');
+        const { productImages } = action.payload;
+
+        // Update both products and filteredProducts arrays
+        const updateProductImages = (products) => {
+          if (!Array.isArray(products)) return;
+
+          const productIndex = products.findIndex(p => p._id === productId);
+          if (productIndex !== -1) {
+            // Replace existing images with the complete updated list from API
+            products[productIndex].productImages = productImages;
           }
         };
-        
-        // Update images in both main products and filtered products
-        updateProductImages(state.products);
-        updateProductImages(state.filteredProducts);
+
+        if (state.products) updateProductImages(state.products);
+        if (state.filteredProducts) updateProductImages(state.filteredProducts);
       })
       .addCase(addProductImages.rejected, (state, action) => {
-        console.log('addProductImages: rejected', action.payload);
         state.addImageStatus = 'failed';
         state.error = action.payload;
       });
