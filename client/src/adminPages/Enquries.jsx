@@ -25,28 +25,10 @@ const Enquiries = () => {
         status,
         error
     } = useSelector(state => state.enquiryList);
-    const [enquiriesLoading, setEnquiriesLoading] = useState(false);
 
     useEffect(() => {
-        const loadEnquiries = async () => {
-            if (enquiriesLoading) return; // Prevent multiple calls
-            setEnquiriesLoading(true); // Set loading to true before fetching
-    
-            try {
-                await dispatch(fetchEnquiries());
-            } catch (error) {
-                console.error("Failed to fetch enquiries:", error);
-                // Optionally, you can set an error state here
-            } finally {
-                setEnquiriesLoading(false); // Always set loading to false after fetching
-            }
-        };
-        
-        loadEnquiries();
-    }, [dispatch]); // Add loading as a dependency if needed
-    
-
-    console.log(enquiries, "enquiries");
+        dispatch(fetchEnquiries());
+    }, [dispatch]);
 
     const filteredEnquiries = useMemo(() => {
         return enquiries.filter(enquiry => {
@@ -66,13 +48,13 @@ const Enquiries = () => {
         });
     }, [enquiries, dateRange, selectedCity, selectedUser, selectedStatus]);
 
-    if (enquiriesLoading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <Loader2 className="animate-spin w-[60px] h-[200px]" />
-            </div>
-        );
-    }
+    // if (enquiriesLoading) {
+    //     return (
+    //         <div className="flex justify-center items-center h-screen">
+    //             <Loader2 className="animate-spin w-[60px] h-[200px]" />
+    //         </div>
+    //     );
+    // }
 
     return (
         <div>

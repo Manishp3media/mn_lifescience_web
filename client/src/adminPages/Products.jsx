@@ -47,29 +47,9 @@ const Products = () => {
         setSearchTerm(searchTerm);
     };
 
-   
-
     useEffect(() => {
-        const loadProducts = async () => {
-            if (productsLoading) return; // Prevent multiple calls
-            setProductsLoading(true); // Set loading to true before fetching
-    
-            try {
-                await dispatch(fetchProducts());
-            } catch (error) {
-                console.error("Failed to fetch enquiries:", error);
-                // Optionally, you can set an error state here
-            } finally {
-                setProductsLoading(false); // Always set loading to false after fetching
-            }
-        };
-        
-        loadProducts();
+        dispatch(fetchProducts());
     }, [dispatch]);
-
-    // useEffect(() => {
-    //     dispatch(fetchProducts());
-    // }, [dispatch]);
 
     // console.log(filteredProducts);
 
@@ -136,13 +116,13 @@ const Products = () => {
         setSelectedProduct(null);
     };
 
-    if (productsLoading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <Loader2 className="animate-spin w-[60px] h-[200px]" />
-            </div>
-        );
-    }
+    // if (fetchStatus === "loading") {
+    //     return (
+    //         <div className="flex justify-center items-center h-screen">
+    //             <Loader2 className="animate-spin w-[60px] h-[200px]" />
+    //         </div>
+    //     );
+    // }
 
 
     return (

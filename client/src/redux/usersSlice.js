@@ -26,6 +26,7 @@ export const fetchUsers = createAsyncThunk(
     name: "usersList",
     initialState: {
       users: [],
+      status: "idle",
     },
     extraReducers: (builder) => {
       builder

@@ -9,33 +9,14 @@ const AdminOptions = () => {
     const dispatch = useDispatch();
     const { banners } = useSelector((state) => state.bannerList);
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [deleting, setDeleting] = useState(false);
-    const [bannersLoading, setBannersLoading] = useState(false);
-
-    // useEffect(() => {
-    //     dispatch(getAllBanners());
-    // }, [dispatch]);
+    const [deletingId, setDeletingId] = useState(null);
 
     useEffect(() => {
-        const loadBanners = async () => {
-            if (bannersLoading) return; // Prevent multiple calls
-            setBannersLoading(true); // Set loading to true before fetching
-    
-            try {
-                await dispatch(getAllBanners());
-            } catch (error) {
-                console.error("Failed to fetch enquiries:", error);
-                // Optionally, you can set an error state here
-            } finally {
-                setBannersLoading(false); // Always set loading to false after fetching
-            }
-        };
-        
-        loadBanners();
+        dispatch(getAllBanners());
     }, [dispatch]);
 
     const handleDelete = async (id) => {
-        setDeleting(true);
+        setDeletingId(id); 
         try {
             await dispatch(deleteBanner(id)).unwrap();
             // Ensure currentSlide is updated correctly after deletion
@@ -47,17 +28,9 @@ const AdminOptions = () => {
             const errorMessage = error?.error || error?.message || "Failed to create product";
             toast.error(errorMessage);
         } finally {
-            setDeleting(false);
+            setDeletingId(null);
         }
     };
-
-    if (bannersLoading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <Loader2 className="animate-spin w-[60px] h-[200px]" />
-            </div>
-        );
-    }
 
     return (
         <div className="container mx-auto px-4">
@@ -73,7 +46,11 @@ const AdminOptions = () => {
                                 className="text-red-500 hover:text-red-700"
                                 title="Delete banner"
                             >
-                                {deleting ? <Loader2 className="animate-spin" w-4 h-4 /> : <Trash2 size={20} />}
+                                {deletingId === banner._id ? (
+                                    <Loader2 className="animate-spin" w-4 h-4 />
+                                ) : (
+                                    <Trash2 size={20} />
+                                )}
                             </button>
                         </div>
                         <img

@@ -14,27 +14,9 @@ const TermsAndConditions = () => {
     const [termsLoading, setTermsLoading] = useState(false);
     const [loadingTerms, setLoadingTerms] = useState(false);
 
-    // useEffect(() => {
-    //     dispatch(fetchTerms());
-    // }, [dispatch]);
-    
     useEffect(() => {
-        const loadTerms = async () => {
-            if (loadingTerms) return; // Prevent multiple calls
-            setLoadingTerms(true); // Set loading to true before fetching
-    
-            try {
-                await dispatch(fetchTerms());
-            } catch (error) {
-                console.error("Failed to fetch enquiries:", error);
-                // Optionally, you can set an error state here
-            } finally {
-                setLoadingTerms(false); // Always set loading to false after fetching
-            }
-        };
-        
-        loadTerms();
-    }, [dispatch]); // Add loading as a dependency if needed
+        dispatch(fetchTerms());
+    }, [dispatch]);
 
     useEffect(() => {
         setTermsContent(content);
@@ -51,14 +33,6 @@ const TermsAndConditions = () => {
             setTermsLoading(false);
         }
     };
-
-    if (loadingTerms) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <Loader2 className="animate-spin w-[60px] h-[200px]" />
-            </div>
-        );
-    }
     
     return (
         <div>

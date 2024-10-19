@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import UsersAndTersmsNavbar from "./UsersNavbar";
 import { Input } from "@/components/ui/input";
 
-const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3 MB
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
 
 const CreateProduct = () => {
   const dispatch = useDispatch();
@@ -53,7 +53,7 @@ const CreateProduct = () => {
     }
 
     if (totalSize > MAX_FILE_SIZE) {
-      toast.error("Total image size exceeds 3 MB. Please upload smaller images.");
+      toast.error("Total image size exceeds 20 MB. Please upload smaller images.");
     }
 
     setSelectedImages(prevImages => [...prevImages, ...newImages]);

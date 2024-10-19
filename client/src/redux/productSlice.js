@@ -215,7 +215,7 @@ const productListSlice = createSlice({
     deleteStatus: "idle",
     bulkUploadStatus: "idle",
     deleteImageStatus: "idle",
-    addProductImagesStatus: "idle"
+    addProductImagesStatus: "idle",
   },
   reducers: {
     setSelectedCategory: (state, action) => {
