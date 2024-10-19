@@ -83,11 +83,8 @@ const CreateCategory = ({ isOpen, onClose }) => {
 
 
                     <DialogFooter>
-                        <Button type="submit" className="bg-[#386D62] hover:bg-[#386D62]" disabled={isCreating}>
+                        <Button type="submit" disabled={isCreating}>
                             {isCreating ? <CustomSpinner size={20} /> : "Create"}
-                        </Button>
-                        <Button className="hover:bg-red-500" onClick={onClose}>
-                            Cancel
                         </Button>
                     </DialogFooter>
                 </form>

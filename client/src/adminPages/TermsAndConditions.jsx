@@ -12,12 +12,11 @@ const TermsAndConditions = () => {
     const { content } = useSelector((state) => state.terms);
     const [termsContent, setTermsContent] = useState(content);
     const [termsLoading, setTermsLoading] = useState(false);
-    const [loadingTerms, setLoadingTerms] = useState(false);
 
     useEffect(() => {
         dispatch(fetchTerms());
     }, [dispatch]);
-
+    
     useEffect(() => {
         setTermsContent(content);
     }, [content]);
@@ -33,7 +32,7 @@ const TermsAndConditions = () => {
             setTermsLoading(false);
         }
     };
-    
+
     return (
         <div>
             <UsersAndTersmsNavbar title="Terms and Conditions" />
