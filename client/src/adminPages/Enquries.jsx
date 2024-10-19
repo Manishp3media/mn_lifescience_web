@@ -46,7 +46,7 @@ const Enquiries = () => {
     }, [dispatch]); // Add loading as a dependency if needed
     
 
-    console.log(enquiries);
+    console.log(enquiries, "enquiries");
 
     const filteredEnquiries = useMemo(() => {
         return enquiries.filter(enquiry => {

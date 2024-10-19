@@ -83,6 +83,8 @@ export const getEnquiries = async (req, res) => {
                     'user.name': 1,
                     'user.mobileNumber': 1,
                     'user.city': 1,
+                    'user.clinicName': 1,
+                    'user.speciality': 1,
                     status: 1,
                     productDetails: {
                         $map: {

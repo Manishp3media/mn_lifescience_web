@@ -246,7 +246,7 @@ const EditProduct = ({ product, onSave }) => {
                     </div>
 
                     <DialogFooter>
-                        <Button type="submit" className="bg-[#386D62] hover:bg-[#386D62]" disabled={isUpdating}>
+                        <Button type="submit" className="bg-blue-600" disabled={isUpdating}>
                             {isUpdating ? <CustomSpinner size={20} /> : "Update"}
                         </Button>
                     </DialogFooter>

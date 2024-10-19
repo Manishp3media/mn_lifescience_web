@@ -64,21 +64,14 @@ const ProductImagesPopup = ({ images, onDeleteImage, onAddImages, isLoading }) =
                         </Card>
                     ))}
                     {localImages.length < 10 && (
-                        <Button 
+                        <Button
                             onClick={() => {
                                 console.log('Opening AddImagesDialog');
                                 setShowAddImages(true);
-                            }} 
+                            }}
                             className="mt-4"
                         >
-                            {isLoading ? (
-                                <CustomSpinner />
-                            ) : (
-                                <>
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Add Images
-                                </>
-                            )}
+                            Add Images
                         </Button>
                     )}
                 </div>
@@ -141,8 +134,8 @@ const AddImagesDialog = ({ onClose, onAddImages, maxImages, isLoading }) => {
                             />
                         ))}
                     </div>
-                    <Button 
-                        onClick={handleSubmit} 
+                    <Button
+                        onClick={handleSubmit}
                         disabled={selectedFiles.length === 0 || isLoading}
                     >
                         {isLoading ? (
