@@ -12,8 +12,8 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UsersAndTersmsNavbar from "./UsersNavbar";
 import { Input } from "@/components/ui/input";
-
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
+import { MAX_FILE_SIZE } from "@/constant/constant";
+import { supportedFormats } from "@/constant/constant";
 
 const CreateProduct = () => {
   const dispatch = useDispatch();
@@ -24,6 +24,7 @@ const CreateProduct = () => {
   const fileInputRef = useRef(null);
   const thumbnailInputRef = useRef(null);
   const [thumbnailImage, setThumbnailImage] = useState(null);
+  const [thumbnailError, setThumbnailError] = useState("");
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -36,42 +37,61 @@ const CreateProduct = () => {
   const handleFileChange = (e) => {
     const files = Array.from(e.currentTarget.files);
     const newImages = [];
-    let totalSize = selectedImages.reduce((sum, img) => sum + img.file.size, 0);
+    // let totalSize = selectedImages.reduce((sum, img) => sum + img.file.size, 0);
     let warnings = [];
 
-    const supportedFormats = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
-
     for (let file of files) {
-      if (!supportedFormats.includes(file.type)) {
-        toast.error(`${file.name} is not a supported format. Please upload jpg, png, jpeg, or webp.`);
+      if (file.size > MAX_FILE_SIZE) {
+        warnings.push(`${file.name} exceeds the 5 MB size limit.`);
         continue;
       }
 
-      totalSize += file.size;
+      if (!supportedFormats.includes(file.type)) {
+        warnings.push(`${file.name} is not a supported format. Please upload jpg, png, jpeg, or webp.`);
+        continue;
+      }
+
+      // totalSize += file.size;
       const preview = URL.createObjectURL(file);
       newImages.push({ file, preview });
-    }
-
-    if (totalSize > MAX_FILE_SIZE) {
-      toast.error("Total image size exceeds 20 MB. Please upload smaller images.");
     }
 
     setSelectedImages(prevImages => [...prevImages, ...newImages]);
     setSizeWarning(warnings.length > 0 ? warnings.join(". ") : "");
 
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputRef.current.value = ""; // Reset file input
     }
   };
 
   const removeImage = (index) => {
     setSelectedImages(prevImages => {
       const newImages = [...prevImages];
-      URL.revokeObjectURL(newImages[index].preview);
-      newImages.splice(index, 1);
+      const removedImage = newImages[index];
+  
+      // Ensure the image exists before trying to access 'size'
+      if (removedImage && removedImage.file) {
+        URL.revokeObjectURL(removedImage.preview); // Revoke object URL
+  
+        // Remove the image from the array
+        newImages.splice(index, 1);
+  
+        // Check if the removed image was causing a size warning
+        if (removedImage.file.size > MAX_FILE_SIZE) {
+          // Check if any remaining images exceed the size limit
+          const hasOversizedImage = newImages.some(img => img.file.size > MAX_FILE_SIZE);
+  
+          // Clear the size warning if no images exceed the size limit
+          if (!hasOversizedImage) {
+            setSizeWarning("");
+          }
+        }
+      }
+  
       return newImages;
     });
   };
+  
 
   const formik = useFormik({
     initialValues: {
@@ -91,20 +111,10 @@ const CreateProduct = () => {
       tags: Yup.string().optional(),
     }),
     onSubmit: async (values) => {
-      if (sizeWarning) {
-        toast.error("Please address the image size warnings before submitting.");
-        return;
-      }
-
       if (!thumbnailImage) {
         toast.error("Please upload a thumbnail image.");
         return;
       }
-
-      // if (selectedImages.length === 0) {
-      //   toast.error("Please select at least one image.");
-      //   return;
-      // }
 
       setIsCreating(true);
       const data = new FormData();
@@ -201,10 +211,17 @@ const CreateProduct = () => {
 
   const handleThumbnailChange = (e) => {
     const file = e.target.files[0];
-    if (file && ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(file.type)) {
+
+    if (file && file.size > MAX_FILE_SIZE) {
+      setThumbnailError(`Image exceeds 5 mb size. please upload image of size less than 5 mb`);
+      return;
+    }
+
+    if (file && supportedFormats.includes(file.type)) {
       setThumbnailImage({ file, preview: URL.createObjectURL(file) });
+      setThumbnailError("");
     } else {
-      toast.error("Unsupported format. Please upload jpg, png, jpeg, or webp.");
+      setThumbnailError("Unsupported format. Please upload jpg, png, jpeg, or webp.");
     }
 
     if (thumbnailInputRef.current) {
@@ -220,6 +237,7 @@ const CreateProduct = () => {
     <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
       <form onSubmit={formik.handleSubmit} className="space-y-6">
         <div className="grid grid-cols-2 gap-x-6">
+
           {/* Product Name */}
           <div>
             <div>
@@ -260,6 +278,7 @@ const CreateProduct = () => {
                 </button>
               </div>
             )}
+            {thumbnailError && <div className="text-red-500 mt-1">{thumbnailError}</div>}
           </div>
   
           {/* SKU */}
@@ -367,7 +386,7 @@ const CreateProduct = () => {
               ref={fileInputRef}
             />
             {sizeWarning && (
-              <div className="text-yellow-500 mt-1">Warning: {sizeWarning}</div>
+              <div className="text-red-500 mt-1">{sizeWarning}</div>
             )}
             <div className="mt-2 flex flex-wrap gap-2">
               {selectedImages.map((img, index) => (

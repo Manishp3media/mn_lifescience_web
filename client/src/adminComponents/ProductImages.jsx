@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trash2 as Delete, Plus } from "lucide-react";
 import CustomSpinner from "./CustomSpinner";
+import { MAX_FILE_SIZE, supportedFormats } from "@/constant/constant";
+import { toast } from "react-toastify";
 
 const ProductImagesPopup = ({ images, onDeleteImage, onAddImages, isLoading }) => {
     const [showAddImages, setShowAddImages] = useState(false);
@@ -11,22 +13,15 @@ const ProductImagesPopup = ({ images, onDeleteImage, onAddImages, isLoading }) =
 
     // Update local state when props change
     useEffect(() => {
-        console.log('Images prop updated:', images);
         setLocalImages(images || []);
     }, [images]);
 
-    useEffect(() => {
-        console.log('ProductImagesPopup rendered:', { localImages, isLoading });
-    }, [localImages, isLoading]);
-
     const handleAddImages = async (files) => {
-        console.log('ProductImagesPopup: handleAddImages called with files:', files);
         try {
             await onAddImages(files);
-            console.log('ProductImagesPopup: Images added successfully');
             // No need to manually update localImages here as it will be updated through props
         } catch (error) {
-            console.error('ProductImagesPopup: Error adding images:', error);
+            toast.error(error);
         }
         setShowAddImages(false);
     };
@@ -93,20 +88,33 @@ const ProductImagesPopup = ({ images, onDeleteImage, onAddImages, isLoading }) =
 
 const AddImagesDialog = ({ onClose, onAddImages, maxImages, isLoading }) => {
     const [selectedFiles, setSelectedFiles] = useState([]);
+    const [imageError, setImageError] = useState("");
 
     const handleFileChange = (event) => {
+         // Reset the size warning whenever file input changes
+         setImageError("");
+
         const files = Array.from(event.target.files);
-        console.log('AddImagesDialog: Files selected:', files.length);
+
+        for (let file of files) {
+            if (file.size > MAX_FILE_SIZE) {
+                setImageError(`${file.name} exceeds the 5 MB size limit. Please upload image of size less than 5 mb`);
+                return;
+            }
+
+            if (!supportedFormats.includes(file.type)) {
+                setImageError(`${file.name} is not a supported format. Please upload jpg, png, jpeg, or webp.`);
+                return; // Early return if format is not supported
+            }
+        }
 
         setSelectedFiles((prevFiles) => {
             const newFiles = [...prevFiles, ...files].slice(0, maxImages);
-            console.log('AddImagesDialog: Updated selected files:', newFiles.length);
             return Array.from(new Set(newFiles));
         });
     };
 
     const handleSubmit = () => {
-        console.log('AddImagesDialog: Submitting files:', selectedFiles.length);
         onAddImages(selectedFiles);
     };
 
@@ -133,7 +141,9 @@ const AddImagesDialog = ({ onClose, onAddImages, maxImages, isLoading }) => {
                                 className="w-full h-24 object-cover"
                             />
                         ))}
+                        
                     </div>
+                    {imageError && <div className="text-red-500">{imageError}</div>}
                     <Button
                         onClick={handleSubmit}
                         disabled={selectedFiles.length === 0 || isLoading}

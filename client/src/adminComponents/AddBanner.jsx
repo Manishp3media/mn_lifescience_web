@@ -6,22 +6,34 @@ import { useDispatch, useSelector } from "react-redux";
 import { createBanner } from "@/redux/bannerSlice"; // Import the createBanner action
 import CustomSpinner from "./CustomSpinner";
 import { toast } from "react-toastify";
+import { supportedFormats, MAX_FILE_SIZE } from "@/constant/constant";
 
 const AddBanner = ({ isOpen, onClose }) => {
     const [bannerImage, setBannerImage] = useState(null);
     const dispatch = useDispatch();
     const [loading , setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const handleImageChange = (event) => {
+        setError(null);
         const file = event.target.files[0];
-        console.log("Selected image file:", file);
+        
+        if (file.size > MAX_FILE_SIZE) {
+            setError(`Image exceeds the 5 MB size limit. Please upload image of size less than 5 mb`);
+            return;
+        }
+
+        if (!supportedFormats.includes(file.type)) {
+            setError(`Unsupported format. Please upload jpg, png, jpeg, or webp`);
+            return;
+        }
+
         setBannerImage(file);
     };
 
     const handleSubmit = useCallback(
         (event) => {
             event.preventDefault();
-            console.log("Form submitted");
     
             if (!bannerImage) {
                 console.error("No image selected.");
@@ -41,7 +53,6 @@ const AddBanner = ({ isOpen, onClose }) => {
                     onClose(); // Close the dialog after successful upload
                 })
                 .catch((error) => {
-                    console.error("Error uploading banner:", error);
                     toast.error("Failed to upload banner.");
                 })
                 .finally(() => {
@@ -61,9 +72,10 @@ const AddBanner = ({ isOpen, onClose }) => {
                 <form onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         <Input type="file" onChange={handleImageChange} accept="image/*" />
+                        {error && <p className="text-red-500">{error}</p>}
                     </div>
                     <DialogFooter className="mt-4">
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" disabled={loading || !bannerImage || error}>
                             {loading ? <CustomSpinner /> : "Upload"}
                         </Button>
                         <Button type="button" variant="secondary" onClick={onClose}>

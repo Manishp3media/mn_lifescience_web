@@ -7,22 +7,41 @@ import { addLogo, editLogo, getLogo } from "@/redux/logoSlice";
 import CustomSpinner from "./CustomSpinner";
 import { toast } from "react-toastify";
 import { set } from "date-fns";
+import { MAX_FILE_SIZE, supportedFormats } from "@/constant/constant";
 
 const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
     const [logoImage, setLogoImage] = useState(null);
     const dispatch = useDispatch();
     const { logo } = useSelector((state) => state.logo); // Get loading and error state from Redux store
     const [uploadLoading, setUploadLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     // Fetch the existing logo on component mount
     useEffect(() => {
         dispatch(getLogo());
     }, [dispatch, onLogoClose]);
 
+     // Reset states when the dialog is closed
+     const handleClose = () => {
+        setLogoImage(null);
+        setError(null);
+        onLogoClose();
+    };
 
     const handleImageChange = (event) => {
+        setError(null);
         const file = event.target.files[0];
-        console.log("Selected image file:", file);
+        
+        if (file.size > MAX_FILE_SIZE) {
+            setError(`Image exceeds the 5 MB size limit. Please upload image of size less than 5 mb`);
+            return;
+        }
+
+        if (!supportedFormats.includes(file.type)) {
+            setError(`Unsupported format. Please upload jpg, png, jpeg, or webp`);
+            return;
+        }
+
         setLogoImage(file);
     };
 
@@ -52,7 +71,7 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
                     await dispatch(addLogo(formData)).unwrap();
                     toast.success("Logo uploaded successfully", { autoClose: 3000 });
                 }
-                onLogoClose();
+                handleClose();
             } catch (error) {
                 console.error("Error uploading logo:", error);
                 toast.error(error.message || "Failed to upload logo."); // Show specific error message if available
@@ -64,7 +83,7 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
     );
 
     return (
-        <Dialog open={isAddLogoOpen} onOpenChange={onLogoClose}>
+        <Dialog open={isAddLogoOpen} onOpenChange={handleClose}>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>{logo[0]?.logoImage ? "Update Logo" : "Upload Logo"}</DialogTitle>
@@ -72,10 +91,10 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
                 <form onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         <Input type="file" onChange={handleImageChange} accept="image/*" />
-                        {/* {error && <p className="text-red-600">{error}</p>} Show error message if exists */}
+                        {error && <p className="text-sm text-red-500">{error}</p>}
                     </div>
                     <DialogFooter className="mt-4">
-                        <Button type="submit" disabled={uploadLoading}>
+                        <Button type="submit" disabled={uploadLoading || !logoImage || error}>
                             {uploadLoading ? <CustomSpinner /> : logo[0]?.logoImage ? "Update" : "Upload"}
                         </Button>
                         <Button type="button" variant="secondary" onClick={onLogoClose}>
