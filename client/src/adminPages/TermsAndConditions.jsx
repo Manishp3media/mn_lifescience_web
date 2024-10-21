@@ -5,6 +5,7 @@ import JoditEditor from 'jodit-react';
 import UsersAndTersmsNavbar from "@/adminComponents/UsersNavbar";
 import { Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
+import MainLoader from "@/adminComponents/MainLoader";
 
 const TermsAndConditions = () => {
     const dispatch = useDispatch();
@@ -12,14 +13,35 @@ const TermsAndConditions = () => {
     const { content } = useSelector((state) => state.terms);
     const [termsContent, setTermsContent] = useState(content);
     const [termsLoading, setTermsLoading] = useState(false);
+    const [loadingTerms, setLoadingTerms] = useState(false);
 
     useEffect(() => {
-        dispatch(fetchTerms());
+        const loadTerms = async () => {
+            if (loadingTerms) return; // Prevent multiple calls
+            setLoadingTerms(true); // Set loading to true before fetching
+    
+            try {
+                await dispatch(fetchTerms());
+            } catch (error) {
+                console.error("Failed to fetch enquiries:", error);
+                // Optionally, you can set an error state here
+            } finally {
+                setLoadingTerms(false); // Always set loading to false after fetching
+            }
+        };
+        
+        loadTerms();
     }, [dispatch]);
     
     useEffect(() => {
         setTermsContent(content);
     }, [content]);
+
+    if (loadingTerms) {
+        return (
+            <MainLoader />
+        )
+    }
 
     const handleSave = async () => {
         try {
@@ -27,7 +49,8 @@ const TermsAndConditions = () => {
             await dispatch(updateTerms(termsContent)).unwrap();
             toast.success('Terms and Conditions updated successfully');
         } catch (err) {
-            toast.error('Failed to update Terms and Conditions');
+            const errorMessage = error?.error || error?.message || "Failed to update terms and conditions";
+            toast.error(errorMessage);
         } finally {
             setTermsLoading(false);
         }

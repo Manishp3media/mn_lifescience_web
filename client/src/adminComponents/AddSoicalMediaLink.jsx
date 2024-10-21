@@ -54,8 +54,9 @@ const AddSocialMediaLink = ({ isSocialMediaLinkOpen, onSocialMediaLinkClose }) =
                 toast.success("Social media link added successfully");
                 formik.resetForm();
             } catch (error) {
-                toast.error(error || "Failed to add social media link");
-                console.error("Error:", error);
+                return rejectWithValue({
+                    error: error.response?.data?.message || "Failed to add social media link",
+                  });
             } finally {
                 onSocialMediaLinkClose();
             }

@@ -17,7 +17,9 @@ export const createBanner = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue({
+        error: error.response?.data?.message || "Failed to create banner"
+      });
     }
   }
 );
@@ -59,7 +61,7 @@ export const deleteBanner = createAsyncThunk(
       return response.data.id;
     } catch (error) {
       return rejectWithValue({
-        error: error.response?.data?.message || "Failed to create product"
+        error: error.response?.data?.message || "Failed to delete banner"
       });
     }
   }

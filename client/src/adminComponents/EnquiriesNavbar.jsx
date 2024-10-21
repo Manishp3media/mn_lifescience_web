@@ -111,7 +111,7 @@ const EnquiriesNavbar = () => {
     const uniqueStatuses = useMemo(() => [...new Set(enquiries?.map(enquiry => enquiry?.status))], [enquiries]);
 
     return (
-        <nav className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg">
+        <nav className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg sticky top-0 z-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center">
@@ -148,6 +148,7 @@ const EnquiriesNavbar = () => {
                                 </div>
                             </PopoverContent>
                         </Popover>
+                        
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" className="bg-white text-purple-600 hover:bg-purple-100">Status</Button>

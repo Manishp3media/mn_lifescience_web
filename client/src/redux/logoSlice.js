@@ -35,7 +35,9 @@ export const addLogo = createAsyncThunk(
             return response.data.logo;
         } catch (error) {
             console.log(error);
-            return rejectWithValue(error.response.data);
+            return rejectWithValue({
+                error: error.response?.data?.message || "Failed to create logo"
+            });
         }
     }
 );
@@ -58,7 +60,9 @@ export const editLogo = createAsyncThunk(
             );
             return response.data.logo;
         } catch (error) {
-            return rejectWithValue(error.response?.data || "Failed to update product");
+            return rejectWithValue({
+                error: error.response?.data?.message || "Failed to update logo"
+            });
         }
     }
 );

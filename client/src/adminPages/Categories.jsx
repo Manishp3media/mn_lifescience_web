@@ -1,5 +1,5 @@
 import CategoryNavbar from "@/adminComponents/CategoryNavbar";
-import React from "react";
+import React  from "react";
 import { fetchCategories } from "@/redux/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
@@ -8,27 +8,48 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import NoData from "@/adminComponents/NoData";
+import MainLoader from "@/adminComponents/MainLoader";
 
 const Categories = () => {
-
     const { categories } = useSelector((state) => state.categoryList);
     const dispatch = useDispatch();
-    const [categoriesLoading, setCategoriesLoading] = React.useState(false);
+    const [categoriesLoading, setCategoriesLoading] = useState(false);
 
     useEffect(() => {
-        dispatch(fetchCategories());
-     }, [dispatch]);
+        const loadCategories = async () => {
+            if (categoriesLoading) return; // Prevent multiple calls
+            setCategoriesLoading(true); // Set loading to true before fetching
+    
+            try {
+                await dispatch(fetchCategories());
+            } catch (error) {
+                console.error("Failed to fetch enquiries:", error);
+                // Optionally, you can set an error state here
+            } finally {
+                setCategoriesLoading(false); // Always set loading to false after fetching
+            }
+        };
+        
+        loadCategories();
+    }, [dispatch]); 
+
+    if (categoriesLoading) {
+        return ( 
+        <MainLoader />
+        )
+    }
 
     return (
         <div>
             <CategoryNavbar />
             <div className="p-4">
+                {categories && categories.length > 0 ? (
+                    
+                
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -56,6 +77,11 @@ const Categories = () => {
                         ))}
                     </TableBody>
                 </Table>
+                ) : (
+                    <div className="w-full h-[calc(100vh-200px)] flex items-center justify-center">
+                  <NoData name="Categories" />
+                </div>
+                )}
             </div>
         </div>
     )

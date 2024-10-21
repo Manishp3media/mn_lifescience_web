@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { updateProduct } from '@/redux/productSlice';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from 'react-toastify';
@@ -14,20 +14,19 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { fetchCategories } from "@/redux/categorySlice";
 import { descriptionConfig, compositionConfig } from "./JoditConfig";
 import JoditEditor from 'jodit-react';
-import { useNavigate } from "react-router-dom";
+import { MAX_FILE_SIZE, supportedFormats } from "@/constant/constant";
 
 const EditProduct = ({ product, onSave }) => {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
     const { categories } = useSelector((state) => state.categoryList);
     const [isUpdating, setIsUpdating] = useState(false);
     const {
         filteredProducts = [],
     } = useSelector(state => state.productList || {});
-
+    const fileInputRef = useRef(null);
+    const imagePreviewRef = useRef(null);
     // const product = filteredProducts;
 
     // Formik with initial values and Yup validation schema
@@ -50,7 +49,24 @@ const EditProduct = ({ product, onSave }) => {
             category: Yup.string().required("Please select a category"),
             // use: Yup.string().required("Use is required"),
 
-            thumbnailImage: Yup.mixed().nullable(), // Allow null for editing
+            thumbnailImage: Yup.mixed()
+                .nullable()
+                .test(
+                    "fileSize",
+                    "File size should be less than 5 MB",
+                    (value) => {
+                        if (!value) return true; // Allow empty value
+                        return value && value.size <= MAX_FILE_SIZE;
+                    }
+                )
+                .test(
+                    "fileFormat",
+                    "Unsupported file format, please upload jpg, png, jpeg, or webp",
+                    (value) => {
+                        if (!value) return true; // Allow empty value
+                        return value && supportedFormats.includes(value.type);
+                    }
+                ), // Allow null for editing
         }),
         onSubmit: async (values) => {
             setIsUpdating(true);
@@ -84,7 +100,7 @@ const EditProduct = ({ product, onSave }) => {
 
                 // onClose();
             } catch (error) {
-                const errorMessage = error?.error || error?.message || "Failed to create product";
+                const errorMessage = error?.error || error?.message || "Failed to update product";
                 toast.error(errorMessage);
                 console.error("Error updating product:", error);
             } finally {
@@ -98,8 +114,40 @@ const EditProduct = ({ product, onSave }) => {
     };
 
     const handleFileChange = (e) => {
-        formik.setFieldValue("thumbnailImage", e.currentTarget.files[0]);
+        const file = e.currentTarget.files[0];
+
+        if (file) {
+            // Clear previous preview if it exists
+            if (imagePreviewRef.current) {
+                URL.revokeObjectURL(imagePreviewRef.current.src);
+            }
+
+            // Create and set new preview
+            const previewUrl = URL.createObjectURL(file);
+            if (imagePreviewRef.current) {
+                imagePreviewRef.current.src = previewUrl;
+            }
+
+            formik.setFieldValue("thumbnailImage", file);
+        }
+
+        formik.setFieldTouched("thumbnailImage", true, false);
     };
+
+    // Handle initial image and cleanup
+    useEffect(() => {
+        // Set initial image if product has one
+        if (product?.thumbnailImage && imagePreviewRef.current) {
+            imagePreviewRef.current.src = product.thumbnailImage;
+        }
+
+        // Cleanup function
+        return () => {
+            if (imagePreviewRef.current && imagePreviewRef.current.src.startsWith('blob:')) {
+                URL.revokeObjectURL(imagePreviewRef.current.src);
+            }
+        };
+    }, [product]);
 
     // Text Editor Config
     const descriptionEditorRef = useRef(null);
@@ -144,15 +192,39 @@ const EditProduct = ({ product, onSave }) => {
                         {/* Thumbnail Image */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 pb-2">Thumbnail Image</label>
-                            <Input
-                                type="file"
-                                name="thumbnailImage"
-                                onChange={handleFileChange}
-                                className="input"
-                            />
-                            {formik.touched.thumbnailImage && formik.errors.thumbnailImage && (
-                                <div className="text-red-500">{formik.errors.thumbnailImage}</div>
-                            )}
+                            <div className="space-y-4">
+
+                                {/* File Input */}
+                                <div className="flex flex-col">
+                                    <Input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        name="thumbnailImage"
+                                        onChange={handleFileChange}
+                                        onBlur={formik.handleBlur}
+                                        className="input"
+                                        accept="image/jpeg,image/png,image/webp"
+                                    />
+                                    {(formik?.touched?.thumbnailImage || formik.values.thumbnailImage) && formik.errors.thumbnailImage && (
+                                        <div className="text-red-500 text-sm mt-1">{formik.errors.thumbnailImage}</div>
+                                    )}
+                                </div>
+
+                                {/* Image Preview */}
+                                {(product?.thumbnailImage || formik.values.thumbnailImage) && (
+                                    <div className="relative w-[80px] h-[80px] border rounded-lg overflow-hidden">
+                                        <img
+                                            ref={imagePreviewRef}
+                                            src={formik.values.thumbnailImage ? URL.createObjectURL(formik.values.thumbnailImage) : product?.thumbnailImage}
+                                            alt="Product thumbnail"
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* SKU */}

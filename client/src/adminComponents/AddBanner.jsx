@@ -11,13 +11,13 @@ import { supportedFormats, MAX_FILE_SIZE } from "@/constant/constant";
 const AddBanner = ({ isOpen, onClose }) => {
     const [bannerImage, setBannerImage] = useState(null);
     const dispatch = useDispatch();
-    const [loading , setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     const handleImageChange = (event) => {
         setError(null);
         const file = event.target.files[0];
-        
+
         if (file.size > MAX_FILE_SIZE) {
             setError(`Image exceeds the 5 MB size limit. Please upload image of size less than 5 mb`);
             return;
@@ -34,16 +34,16 @@ const AddBanner = ({ isOpen, onClose }) => {
     const handleSubmit = useCallback(
         (event) => {
             event.preventDefault();
-    
+
             if (!bannerImage) {
                 console.error("No image selected.");
                 toast.error("Please select an image before uploading.");
                 return;
             }
-    
+
             const formData = new FormData();
             formData.append("bannerImage", bannerImage);
-    
+
             setLoading(true);
             // Dispatch the createBanner action
             dispatch(createBanner(formData))
@@ -53,7 +53,8 @@ const AddBanner = ({ isOpen, onClose }) => {
                     onClose(); // Close the dialog after successful upload
                 })
                 .catch((error) => {
-                    toast.error("Failed to upload banner.");
+                    const errorMessage = error?.error || error?.message || "Failed to create banner";
+                    toast.error(errorMessage);
                 })
                 .finally(() => {
                     setLoading(false);
@@ -61,7 +62,7 @@ const AddBanner = ({ isOpen, onClose }) => {
         },
         [dispatch, bannerImage, onClose]
     );
-    
+
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>

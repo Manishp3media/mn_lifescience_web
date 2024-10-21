@@ -1,14 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus} from "lucide-react";
 import AddBanner from "./AddBanner";
 import AddSocialMediaLink from "./AddSoicalMediaLink";
 import AddLogo from "./AddLogo";
+import { getLogo } from "@/redux/logoSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const AdminOptionsNavbar = () => {
+    const dispatch = useDispatch();
     const [isBannerModalOpen, setBannerModalOpen] = useState(false);
     const [isOpenSocialModal, setOpenSocialModal] = useState(false);
     const [isOpenLogoModal, setOpenLogoModal] = useState(false);
+    const { logo } = useSelector((state) => state.logo); 
+
+    useEffect(() => {
+        dispatch(getLogo());
+    }, [dispatch]);
 
     const handleOpenSocialModal = () => {
         setOpenSocialModal(true);
@@ -28,7 +36,7 @@ const AdminOptionsNavbar = () => {
 
     return (
         <div>
-        <nav className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg">
+        <nav className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg sticky top-0 z-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center">
@@ -56,7 +64,7 @@ const AdminOptionsNavbar = () => {
                             onClick={handleLogoModal}
                         >
                             <Plus className="mr-2 h-5 w-5" />
-                            Add Logo
+                            {logo[0]?.logoImage ? "Update Logo" : "Add Logo"}
                         </Button>
 
                         {/* AddSocialMediaLink modal */}
@@ -69,9 +77,7 @@ const AdminOptionsNavbar = () => {
                         </Button>
                     </div>
                 </div>
-
             </div>
-            
         </nav>
          {/* AddBanner modal */}
          {isBannerModalOpen && (

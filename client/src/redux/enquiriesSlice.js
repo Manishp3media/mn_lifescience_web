@@ -40,7 +40,9 @@ export const updateEnquiryStatus = createAsyncThunk(
       );
       return response.data; // Assuming the API returns the updated enquiry
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to update enquiry status');
+      return rejectWithValue({
+        error: error.response?.data?.message || "Failed to update status"
+      });
     }
   }
 );

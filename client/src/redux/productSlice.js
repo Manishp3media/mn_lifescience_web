@@ -68,7 +68,7 @@ export const updateProduct = createAsyncThunk(
     } catch (error) {
       console.log(error, "edit product error");
       return rejectWithValue({
-        error: error.response?.data?.message || "Failed to create product"
+        error: error.response?.data?.message || "Failed to update product"
       });
     }
   }
@@ -92,7 +92,9 @@ export const updateStatus = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to update status");
+      return rejectWithValue({
+        error: error.response?.data?.message || "Failed to update status"
+      });
     }
   }
 );
@@ -119,7 +121,9 @@ export const deleteProduct = createAsyncThunk(
       return id;
     } catch (error) {
       console.error("Error during delete request:", error); // Step 3: Catch and log error
-      return rejectWithValue(error.response?.data || "Failed to delete product");
+      return rejectWithValue({
+        error: error.response?.data?.message || "Failed to delete product"
+      });
     }
   }
 );
@@ -170,7 +174,9 @@ export const deleteProductImage = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to delete image");
+      return rejectWithValue({
+        error: error.response?.data?.message || "Failed to delete product image"
+      });
     }
   }
 );
@@ -197,8 +203,9 @@ export const addProductImages = createAsyncThunk(
       console.log('addProductImages thunk: Response received:', response.data);
       return response.data;
     } catch (error) {
-      console.log(error, "add product images error");
-      return rejectWithValue(error.response?.data || "Failed to add images");
+      return rejectWithValue({
+        error: error.response?.data?.message || "Failed to add product images"
+      });
     }
   }
 );

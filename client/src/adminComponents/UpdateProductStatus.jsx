@@ -23,8 +23,8 @@ const UpdateProductStatus = ({ productId, currentStatus }) => {
             toast.success('Status updated successfully');
            
         } catch (error) {
-            console.error('Error updating status:', error);
-            toast.error('Failed to update status');
+            const errorMessage = error?.error || error?.message || "Failed to update status";
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -38,10 +38,10 @@ const UpdateProductStatus = ({ productId, currentStatus }) => {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleUpdateStatus('available')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => handleUpdateStatus('available')}>
                     Available
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleUpdateStatus('out of stock')}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => handleUpdateStatus('out of stock')}>
                     Out of Stock
                 </DropdownMenuItem>
             </DropdownMenuContent>

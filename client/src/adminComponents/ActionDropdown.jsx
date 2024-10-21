@@ -17,8 +17,8 @@ const ActionDropdown = ({ onEdit, onDelete }) => {
                 <Ellipsis className="h-5 w-5 cursor-pointer" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-                <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
-                <DropdownMenuItem onClick={onDelete}>Delete</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={onEdit}>Edit</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={onDelete}>Delete</DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );

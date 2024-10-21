@@ -18,7 +18,7 @@ export const fetchCategories = createAsyncThunk(
         return response.data.categories; 
       } catch (error) {
         return rejectWithValue({
-          error: error.response?.data?.message || "Failed to create category",
+          error: error.response?.data?.message,
         });
       }
     }
@@ -44,7 +44,9 @@ export const fetchCategories = createAsyncThunk(
         );
         return response.data.category;
       } catch (error) {
-        return rejectWithValue(error.response?.data || "Failed to create category");
+        return rejectWithValue({
+          error: error.response?.data?.message || "Failed to create category",
+        });
       }
     }
   );

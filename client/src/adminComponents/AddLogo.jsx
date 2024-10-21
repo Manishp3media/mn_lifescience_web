@@ -12,7 +12,7 @@ import { MAX_FILE_SIZE, supportedFormats } from "@/constant/constant";
 const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
     const [logoImage, setLogoImage] = useState(null);
     const dispatch = useDispatch();
-    const { logo } = useSelector((state) => state.logo); // Get loading and error state from Redux store
+    const { logo } = useSelector((state) => state.logo);
     const [uploadLoading, setUploadLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -21,8 +21,8 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
         dispatch(getLogo());
     }, [dispatch, onLogoClose]);
 
-     // Reset states when the dialog is closed
-     const handleClose = () => {
+    // Reset states when the dialog is closed
+    const handleClose = () => {
         setLogoImage(null);
         setError(null);
         onLogoClose();
@@ -31,7 +31,7 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
     const handleImageChange = (event) => {
         setError(null);
         const file = event.target.files[0];
-        
+
         if (file.size > MAX_FILE_SIZE) {
             setError(`Image exceeds the 5 MB size limit. Please upload image of size less than 5 mb`);
             return;
@@ -73,8 +73,8 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
                 }
                 handleClose();
             } catch (error) {
-                console.error("Error uploading logo:", error);
-                toast.error(error.message || "Failed to upload logo."); // Show specific error message if available
+                const errorMessage = error?.error || error?.message || "Failed to upload logo";
+                toast.error(errorMessage);
             } finally {
                 setUploadLoading(false);
             }

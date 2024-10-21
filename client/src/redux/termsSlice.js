@@ -34,8 +34,9 @@ export const updateTerms = createAsyncThunk(
 
             return response.data; // Return the response data on success
         } catch (error) {
-            // Use rejectWithValue to return the error message
-            return rejectWithValue(error.response?.data || 'Something went wrong');
+            return rejectWithValue({
+                error: error.response?.data?.message || "Failed to update terms & conditions"
+            });
         }
     }
 );

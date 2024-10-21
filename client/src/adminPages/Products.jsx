@@ -27,6 +27,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import NoData from "@/adminComponents/NoData";
+import MainLoader from "@/adminComponents/MainLoader";
 
 const Products = () => {
     const dispatch = useDispatch();
@@ -43,12 +45,27 @@ const Products = () => {
     const [laodingProductId, setLoadingProductId] = useState(null);
     const [addingImagesProductId, setAddingImagesProductId] = useState(null);
     const [productsLoading, setProductsLoading] = useState(false);
+    
     const handleSearch = (searchTerm) => {
         setSearchTerm(searchTerm);
     };
 
     useEffect(() => {
-        dispatch(fetchProducts());
+        const loadProducts = async () => {
+            if (productsLoading) return; // Prevent multiple calls
+            setProductsLoading(true); // Set loading to true before fetching
+    
+            try {
+                await dispatch(fetchProducts());
+            } catch (error) {
+                console.error("Failed to fetch enquiries:", error);
+                // Optionally, you can set an error state here
+            } finally {
+                setProductsLoading(false); // Always set loading to false after fetching
+            }
+        };
+        
+        loadProducts();
     }, [dispatch]);
 
     // console.log(filteredProducts);
@@ -72,8 +89,8 @@ const Products = () => {
 
             toast.success("Product deleted successfully");
         } catch (error) {
-
-            toast.error(error?.message || "Failed to delete product");
+            const errorMessage = error?.error || error?.message || "Failed to delete product";
+            toast.error(errorMessage);
         } finally {
             // Reset loading product ID after the operation
             setLoadingProductId(null);
@@ -85,7 +102,8 @@ const Products = () => {
             await dispatch(deleteProductImage({ id, imageId })).unwrap();
             toast.success("Image deleted successfully");
         } catch (error) {
-            toast.error(error?.message || "Failed to delete image");
+            const errorMessage = error?.error || error?.message || "Failed to delete product image";
+            toast.error(errorMessage);  
         }
     };
 
@@ -102,8 +120,8 @@ const Products = () => {
             await dispatch(addProductImages(formData)).unwrap(); // Pass the formData directly
             toast.success("Images added successfully");
         } catch (error) {
-            console.error('Error adding images:', error);
-            toast.error(error?.message || "Failed to add images");
+            const errorMessage = error?.error || error?.message || "Failed to add product images";
+            toast.error(errorMessage);
         } finally {
             setAddingImagesProductId(null);
         }
@@ -116,20 +134,19 @@ const Products = () => {
         setSelectedProduct(null);
     };
 
-    // if (fetchStatus === "loading") {
-    //     return (
-    //         <div className="flex justify-center items-center h-screen">
-    //             <Loader2 className="animate-spin w-[60px] h-[200px]" />
-    //         </div>
-    //     );
-    // }
-
+    
+    if (productsLoading) {
+        return (
+            <MainLoader />
+        )
+    }
 
     return (
         <div >
             <AdminNavbar title="Products" onSearch={handleSearch} />
             <div className="p-4">
-                {openEditModal && selectedProduct ? (
+                {filteredAndSearchedProducts && filteredAndSearchedProducts.length > 0 ? (
+                openEditModal && selectedProduct ? (
                     <EditProduct
                         product={selectedProduct}
                         onSave={handleSave}
@@ -149,7 +166,7 @@ const Products = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody >
-                            {filteredAndSearchedProducts.map((product) => (
+                            {filteredAndSearchedProducts?.map((product) => (
                                 <TableRow key={product?._id}>
                                     <TableCell>
                                         {product?.name}
@@ -161,7 +178,7 @@ const Products = () => {
                                     <TableCell>
                                         <UpdateProductStatus
                                             productId={product._id}
-                                            currentStatus={product.status}
+                                            currentStatus={product?.status}
                                         />
                                     </TableCell>
 
@@ -213,7 +230,12 @@ const Products = () => {
                             ))}
                         </TableBody>
                     </Table>
-                )}
+                )
+                ) : (
+                    <div className="w-full h-[calc(100vh-200px)] flex items-center justify-center">
+                      <NoData name="Products" />
+                    </div>
+                  )}    
             </div>
         </div>
     );

@@ -19,8 +19,9 @@ export const addSocialMediaLink = createAsyncThunk(
         return response.data.newLink;
       } catch (error) {
         console.log(error);
-        return rejectWithValue(error.response?.data?.message || "Failed to create product");
-        console.log(error.response.data.message)
+        return rejectWithValue({
+          error: error.response?.data?.message || "Failed to add social media link",
+        });
       }
     }
   );

@@ -12,8 +12,9 @@ import {
 import moment from "moment";
 import EnquiriesNavbar from "@/adminComponents/EnquiriesNavbar";
 import EnquiryStatusDropdown from "@/adminComponents/EnquiryStatusDropdown";
-import { Inbox } from "lucide-react";
 import NoData from "@/adminComponents/NoData";
+
+import MainLoader from "@/adminComponents/MainLoader";
 
 const Enquiries = () => {
     const dispatch = useDispatch();
@@ -26,9 +27,24 @@ const Enquiries = () => {
         status,
         error
     } = useSelector(state => state.enquiryList);
+    const [enquiriesLoading, setEnquiriesLoading] = useState(false);
 
     useEffect(() => {
-        dispatch(fetchEnquiries());
+        const loadEnquiries = async () => {
+            if (enquiriesLoading) return; // Prevent multiple calls
+            setEnquiriesLoading(true); // Set loading to true before fetching
+    
+            try {
+                await dispatch(fetchEnquiries());
+            } catch (error) {
+                console.error("Failed to fetch enquiries:", error);
+                // Optionally, you can set an error state here
+            } finally {
+                setEnquiriesLoading(false); // Always set loading to false after fetching
+            }
+        };
+        
+        loadEnquiries();
     }, [dispatch]);
 
     const filteredEnquiries = useMemo(() => {
@@ -47,6 +63,12 @@ const Enquiries = () => {
             return isInDateRange && matchesCity && matchesUser && matchesStatus;
         });
     }, [enquiries, dateRange, selectedCity, selectedUser, selectedStatus]);
+
+    if (enquiriesLoading) {
+        return (
+            <MainLoader />
+        );
+    }
 
     return (
         <div>

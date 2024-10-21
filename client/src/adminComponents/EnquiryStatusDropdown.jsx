@@ -7,7 +7,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-  } from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { updateEnquiryStatus } from "@/redux/enquiriesSlice";
@@ -25,7 +25,8 @@ const EnquiryStatusDropdown = ({ enquiryId, currentStatus }) => {
             await dispatch(updateEnquiryStatus({ id: enquiryId, status })).unwrap();
             toast.success("Status updated successfully");
         } catch (error) {
-            toast.error("Failed to update status");
+            const errorMessage = error?.error || error?.message || "Failed to update status";
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
