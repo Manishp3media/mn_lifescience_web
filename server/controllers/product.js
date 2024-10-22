@@ -68,50 +68,167 @@ export const createProduct = async (req, res) => {
 }
 
 // Controller for handling bulk product uploads via Excel
+// export const bulkUploadProducts = async (req, res) => {
+//     try {
+//         // Check if file exists
+//         if (!req.file) {
+//             return res.status(400).json({ message: "No file uploaded" });
+//         }
+
+//         // Parse the Excel file from buffer (since it's stored in memory)
+//         const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+//         const sheetName = workbook.SheetNames[0];
+//         const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+//          // Normalize the header names to lower case
+//          const normalizedSheet = sheet.map(row => {
+//             const normalizedRow = {};
+//             for (const key in row) {
+//                 normalizedRow[key.toLowerCase()] = row[key]; // Normalize keys to lower case
+//             }
+//             return normalizedRow;
+//         });
+
+//         const products = [];
+//         for (const row of normalizedSheet) {
+//             try {
+//                 // Validate each row using Zod schema
+//                 createProductSchema.parse(row);
+
+//                 const { name, description, category: categoryName, composition, sku, tags } = row;
+
+//                 // Check if SKU already exists
+//                 const existingProduct = await Product.findOne({ sku });
+//                 if (existingProduct) {
+//                     console.warn(`SKU ${sku} already exists, skipping...`);
+//                     continue;
+//                 }
+
+//                 // Find the category by name
+//                 const category = await Category.findOne({ name: categoryName.toLowerCase() });
+//                 if (!category) {
+//                     console.warn(`Category ${categoryName} not found, skipping...`);
+//                     continue;
+//                 }
+
+//                 // Create product object
+//                 const product = new Product({
+//                     name,
+//                     description,
+//                     category: category._id,
+//                     composition,
+//                     sku,
+//                     tags
+//                 });
+
+//                 // Save product to database
+//                 await product.save();
+//                 products.push(product);  // Add saved product to the response array
+//             } catch (err) {
+//                 console.error(err);
+//                 continue;  // Skip invalid product row
+//             }
+//         }
+
+//         res.status(201).json({ message: "Bulk upload completed", products });
+
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ error: err.message });
+//     }
+// };
+
+
 export const bulkUploadProducts = async (req, res) => {
+    console.log('Starting bulk upload process');
+    const startTime = Date.now();
+
     try {
         // Check if file exists
         if (!req.file) {
+            console.error('No file provided in request');
             return res.status(400).json({ message: "No file uploaded" });
         }
 
-        // Parse the Excel file from buffer (since it's stored in memory)
+        console.log('File details:', {
+            originalName: req.file.originalname,
+            size: req.file.size,
+            mimeType: req.file.mimetype
+        });
+
+        // Parse the Excel file from buffer
+        console.log('Starting Excel parsing');
         const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
         const sheetName = workbook.SheetNames[0];
         const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+        console.log(`Excel parsing complete. Found ${sheet.length} rows`);
 
-         // Normalize the header names to lower case
-         const normalizedSheet = sheet.map(row => {
+        // Normalize the header names
+        console.log('Normalizing headers');
+        const normalizedSheet = sheet.map(row => {
             const normalizedRow = {};
             for (const key in row) {
-                normalizedRow[key.toLowerCase()] = row[key]; // Normalize keys to lower case
+                normalizedRow[key.toLowerCase()] = row[key];
             }
             return normalizedRow;
         });
 
         const products = [];
+        const errors = [];
+        let processed = 0;
+        let skipped = 0;
+
+        console.log('Starting row processing');
         for (const row of normalizedSheet) {
+            processed++;
             try {
-                // Validate each row using Zod schema
-                createProductSchema.parse(row);
+                // Log progress every 10 rows
+                if (processed % 10 === 0) {
+                    console.log(`Processed ${processed}/${normalizedSheet.length} rows`);
+                }
+
+                // Validate row
+                try {
+                    createProductSchema.parse(row);
+                } catch (validationError) {
+                    errors.push({
+                        row: processed,
+                        error: 'Validation failed',
+                        details: validationError.errors
+                    });
+                    skipped++;
+                    continue;
+                }
 
                 const { name, description, category: categoryName, composition, sku, tags } = row;
 
-                // Check if SKU already exists
+                // Check SKU
                 const existingProduct = await Product.findOne({ sku });
                 if (existingProduct) {
-                    console.warn(`SKU ${sku} already exists, skipping...`);
+                    console.log(`Duplicate SKU found: ${sku}`);
+                    errors.push({
+                        row: processed,
+                        error: 'Duplicate SKU',
+                        sku
+                    });
+                    skipped++;
                     continue;
                 }
 
-                // Find the category by name
+                // Find category
                 const category = await Category.findOne({ name: categoryName.toLowerCase() });
                 if (!category) {
-                    console.warn(`Category ${categoryName} not found, skipping...`);
+                    console.log(`Category not found: ${categoryName}`);
+                    errors.push({
+                        row: processed,
+                        error: 'Category not found',
+                        category: categoryName
+                    });
+                    skipped++;
                     continue;
                 }
 
-                // Create product object
+                // Create and save product
                 const product = new Product({
                     name,
                     description,
@@ -121,20 +238,54 @@ export const bulkUploadProducts = async (req, res) => {
                     tags
                 });
 
-                // Save product to database
                 await product.save();
-                products.push(product);  // Add saved product to the response array
+                products.push({
+                    sku,
+                    name,
+                    categoryName
+                });
+
             } catch (err) {
-                console.error(err);
-                continue;  // Skip invalid product row
+                console.error(`Error processing row ${processed}:`, err);
+                errors.push({
+                    row: processed,
+                    error: err.message
+                });
+                skipped++;
             }
         }
 
-        res.status(201).json({ message: "Bulk upload completed", products });
+        const endTime = Date.now();
+        const processingTime = (endTime - startTime) / 1000;
+
+        const summary = {
+            message: "Bulk upload completed",
+            totalRows: normalizedSheet.length,
+            successfulUploads: products.length,
+            skippedRows: skipped,
+            processingTimeSeconds: processingTime,
+            products,
+            errors
+        };
+
+        console.log('Upload summary:', summary);
+        res.status(201).json(summary);
 
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: err.message });
+        const endTime = Date.now();
+        const processingTime = (endTime - startTime) / 1000;
+
+        console.error('Fatal error in bulk upload:', {
+            error: err.message,
+            stack: err.stack,
+            processingTime
+        });
+
+        res.status(500).json({
+            error: err.message,
+            processingTime,
+            errorDetails: err.stack
+        });
     }
 };
 
