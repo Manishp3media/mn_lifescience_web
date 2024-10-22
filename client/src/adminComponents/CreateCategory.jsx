@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import CustomSpinner from "@/adminComponents/CustomSpinner";
 import { toast } from "react-toastify";
 import { MAX_FILE_SIZE, supportedFormats } from "@/constant/constant";
+import { compressImage } from "./CompressImage";
+
 const CreateCategory = ({ isOpen, onClose }) => {
     const dispatch = useDispatch();
     const { createCategoryLoading } = useSelector((state) => state.categoryList);
@@ -31,8 +33,6 @@ const CreateCategory = ({ isOpen, onClose }) => {
         // Check for category logo
         if (!categoryLogo) {
             newErrors.categoryLogo = "Category logo is required";
-        } else if (categoryLogo.size > MAX_FILE_SIZE) {
-            newErrors.categoryLogo = `Category logo exceeds the 5 MB size limit. Please upload image of size less than 5 mb`;
         } else if (!supportedFormats.includes(categoryLogo.type)) {
             newErrors.categoryLogo = `Category logo is not a supported format. Please upload jpg, png, jpeg, or webp.`;
         }
@@ -53,7 +53,15 @@ const CreateCategory = ({ isOpen, onClose }) => {
         const formData = new FormData();
         formData.append("name", categoryName);
         if (categoryLogo) {
-            formData.append("categoryLogo", categoryLogo);
+            try {
+                // Compress the image before adding it to the form data
+                const { file: compressedFile } = await compressImage(categoryLogo);
+                formData.append("categoryLogo", compressedFile);
+            } catch (error) {
+                toast.error("Failed to compress image");
+                setIsCreating(false);
+                return;
+            }
         }
 
         try {

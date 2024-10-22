@@ -7,6 +7,7 @@ import { createBanner } from "@/redux/bannerSlice"; // Import the createBanner a
 import CustomSpinner from "./CustomSpinner";
 import { toast } from "react-toastify";
 import { supportedFormats, MAX_FILE_SIZE } from "@/constant/constant";
+import { compressImage } from "./CompressImage";
 
 const AddBanner = ({ isOpen, onClose }) => {
     const [bannerImage, setBannerImage] = useState(null);
@@ -18,11 +19,6 @@ const AddBanner = ({ isOpen, onClose }) => {
         setError(null);
         const file = event.target.files[0];
 
-        if (file.size > MAX_FILE_SIZE) {
-            setError(`Image exceeds the 5 MB size limit. Please upload image of size less than 5 mb`);
-            return;
-        }
-
         if (!supportedFormats.includes(file.type)) {
             setError(`Unsupported format. Please upload jpg, png, jpeg, or webp`);
             return;
@@ -32,7 +28,7 @@ const AddBanner = ({ isOpen, onClose }) => {
     };
 
     const handleSubmit = useCallback(
-        (event) => {
+       async (event) => {
             event.preventDefault();
 
             if (!bannerImage) {
@@ -41,8 +37,10 @@ const AddBanner = ({ isOpen, onClose }) => {
                 return;
             }
 
+            const { file: compressedFile } = await compressImage(bannerImage);
+
             const formData = new FormData();
-            formData.append("bannerImage", bannerImage);
+            formData.append("bannerImage", compressedFile);
 
             setLoading(true);
             // Dispatch the createBanner action

@@ -6,8 +6,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { addLogo, editLogo, getLogo } from "@/redux/logoSlice";
 import CustomSpinner from "./CustomSpinner";
 import { toast } from "react-toastify";
-import { set } from "date-fns";
 import { MAX_FILE_SIZE, supportedFormats } from "@/constant/constant";
+import { compressImage } from "./CompressImage";
 
 const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
     const [logoImage, setLogoImage] = useState(null);
@@ -19,7 +19,7 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
     // Fetch the existing logo on component mount
     useEffect(() => {
         dispatch(getLogo());
-    }, [dispatch, onLogoClose]);
+    }, [dispatch]);
 
     // Reset states when the dialog is closed
     const handleClose = () => {
@@ -31,11 +31,6 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
     const handleImageChange = (event) => {
         setError(null);
         const file = event.target.files[0];
-
-        if (file.size > MAX_FILE_SIZE) {
-            setError(`Image exceeds the 5 MB size limit. Please upload image of size less than 5 mb`);
-            return;
-        }
 
         if (!supportedFormats.includes(file.type)) {
             setError(`Unsupported format. Please upload jpg, png, jpeg, or webp`);
@@ -56,12 +51,14 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
             }
 
             const formData = new FormData();
-            formData.append("logoImage", logoImage);
 
             try {
                 setUploadLoading(true);
-                if (logo[0]?.logoImage) {
+                 // Compress the logo image before uploading
+                 const { file: compressedFile } = await compressImage(logoImage);
+                 formData.append("logoImage", compressedFile);
 
+                if (logo[0]?.logoImage) {
                     // If logo exists, dispatch editLogo
                     formData.append("id", logo[0]._id); // Pass the existing logo ID for update
                     await dispatch(editLogo(formData)).unwrap();
@@ -79,7 +76,7 @@ const AddLogo = ({ isAddLogoOpen, onLogoClose }) => {
                 setUploadLoading(false);
             }
         },
-        [dispatch, logoImage, onLogoClose]
+        [dispatch, logoImage,logo, onLogoClose]
     );
 
     return (

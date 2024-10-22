@@ -6,6 +6,7 @@ import { Trash2 as Delete, Plus } from "lucide-react";
 import CustomSpinner from "./CustomSpinner";
 import { MAX_FILE_SIZE, supportedFormats } from "@/constant/constant";
 import { toast } from "react-toastify";
+import { compressImage } from "./CompressImage";
 
 const ProductImagesPopup = ({ images, onDeleteImage, onAddImages, isLoading }) => {
     const [showAddImages, setShowAddImages] = useState(false);
@@ -97,11 +98,6 @@ const AddImagesDialog = ({ onClose, onAddImages, maxImages, isLoading }) => {
         const files = Array.from(event.target.files);
 
         for (let file of files) {
-            if (file.size > MAX_FILE_SIZE) {
-                setImageError(`${file.name} exceeds the 5 MB size limit. Please upload image of size less than 5 mb`);
-                return;
-            }
-
             if (!supportedFormats.includes(file.type)) {
                 setImageError(`${file.name} is not a supported format. Please upload jpg, png, jpeg, or webp.`);
                 return; // Early return if format is not supported
@@ -114,8 +110,23 @@ const AddImagesDialog = ({ onClose, onAddImages, maxImages, isLoading }) => {
         });
     };
 
-    const handleSubmit = () => {
-        onAddImages(selectedFiles);
+    const handleSubmit = async () => {
+        const compressedFiles = [];
+        for (const file of selectedFiles) {
+            try {
+                const compressedImage = await compressImage(file, 100); // Compress with a max size of 100 KB
+                compressedFiles.push(compressedImage.file); // Push only the compressed file
+            } catch (error) {
+                toast.error(error.message);
+            }
+        }
+
+        if (compressedFiles.length > 0) {
+            await onAddImages(compressedFiles); // Pass the compressed files to the parent component
+        }
+
+        setSelectedFiles([]); // Clear selected files after submission
+        onClose(); // Close the dialog
     };
 
     return (

@@ -14,6 +14,7 @@ import UsersAndTersmsNavbar from "./UsersNavbar";
 import { Input } from "@/components/ui/input";
 import { MAX_FILE_SIZE } from "@/constant/constant";
 import { supportedFormats } from "@/constant/constant";
+import { compressImage } from "./CompressImage";
 
 const CreateProduct = () => {
   const dispatch = useDispatch();
@@ -30,30 +31,33 @@ const CreateProduct = () => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
+  // Handle Category Selection
   const handleCategorySelect = (category) => {
     formik.setFieldValue("category", category);
   };
 
-  const handleFileChange = (e) => {
+  // Handle Product Images
+  const handleFileChange = async (e) => {
     const files = Array.from(e.currentTarget.files);
     const newImages = [];
-    // let totalSize = selectedImages.reduce((sum, img) => sum + img.file.size, 0);
     let warnings = [];
 
     for (let file of files) {
-      if (file.size > MAX_FILE_SIZE) {
-        warnings.push(`${file.name} exceeds the 5 MB size limit.`);
-        continue;
-      }
-
       if (!supportedFormats.includes(file.type)) {
         warnings.push(`${file.name} is not a supported format. Please upload jpg, png, jpeg, or webp.`);
         continue;
       }
 
+      try {
+        const compressedImage = await compressImage(file);
+        newImages.push(compressedImage);
+      } catch (error) {
+        warnings.push(`Failed to process ${file.name}: ${error.message}`);
+      }
+
       // totalSize += file.size;
-      const preview = URL.createObjectURL(file);
-      newImages.push({ file, preview });
+      // const preview = URL.createObjectURL(file);
+      // newImages.push({ file, preview });
     }
 
     setSelectedImages(prevImages => [...prevImages, ...newImages]);
@@ -209,25 +213,49 @@ const CreateProduct = () => {
     defaultActionOnPaste: 'insert_clear_html',
   }), []);
 
-  const handleThumbnailChange = (e) => {
-    const file = e.target.files[0];
+  // const handleThumbnailChange = (e) => {
+  //   const file = e.target.files[0];
 
-    if (file && file.size > MAX_FILE_SIZE) {
-      setThumbnailError(`Image exceeds 5 mb size. please upload image of size less than 5 mb`);
-      return;
-    }
+  //   if (file && file.size > MAX_FILE_SIZE) {
+  //     setThumbnailError(`Image exceeds 5 mb size. please upload image of size less than 5 mb`);
+  //     return;
+  //   }
 
-    if (file && supportedFormats.includes(file.type)) {
-      setThumbnailImage({ file, preview: URL.createObjectURL(file) });
-      setThumbnailError("");
-    } else {
-      setThumbnailError("Unsupported format. Please upload jpg, png, jpeg, or webp.");
-    }
+  //   if (file && supportedFormats.includes(file.type)) {
+  //     setThumbnailImage({ file, preview: URL.createObjectURL(file) });
+  //     setThumbnailError("");
+  //   } else {
+  //     setThumbnailError("Unsupported format. Please upload jpg, png, jpeg, or webp.");
+  //   }
 
-    if (thumbnailInputRef.current) {
-      thumbnailInputRef.current.value = "";
-    }
-  };
+  //   if (thumbnailInputRef.current) {
+  //     thumbnailInputRef.current.value = "";
+  //   }
+  // };
+
+  // Modified handleThumbnailChange function
+const handleThumbnailChange = async (e) => {
+  const file = e.target.files[0];
+  
+  if (!file) return;
+  
+  if (!supportedFormats.includes(file.type)) {
+    setThumbnailError("Unsupported format. Please upload jpg, png, jpeg, or webp.");
+    return;
+  }
+  
+  try {
+    const compressedImage = await compressImage(file);
+    setThumbnailImage(compressedImage);
+    setThumbnailError("");
+  } catch (error) {
+    setThumbnailError(`Failed to process image: ${error.message}`);
+  }
+  
+  if (thumbnailInputRef.current) {
+    thumbnailInputRef.current.value = "";
+  }
+};
 
 
   return (
